@@ -1,0 +1,14 @@
+# Line endings: text files are stored with LF and checked out with the platform's usual ending.
+* text=auto
+
+# Always LF, on every platform: the Dockerfile's heredoc must not contain CR characters.
+Dockerfile text eol=lf
+
+# Binary formats: never converted.
+*.pdf binary
+*.docx binary
+*.xlsx binary
+
+# Sample CSV files are test fixtures, like the other inputs: keep their exact bytes everywhere, so the
+# checksums recorded in the ground truth stay valid.
+sample_data/**/*.csv -text

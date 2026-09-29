@@ -1,0 +1,3084 @@
+{
+  "description": "Expected aggregates computed from tenants/<tenant>/ground_truth/canonical_records.jsonl with the default attendance formula. Synthetic data.",
+  "generator": {
+    "script": "generator/generate.py",
+    "base_seed": 20260801,
+    "constraint_attempt": 2
+  },
+  "period": {
+    "start": "2026-08-01",
+    "end": "2026-08-31"
+  },
+  "formula": {
+    "weights": {
+      "PRESENT": 1.0,
+      "WFH": 1.0,
+      "HALF_DAY": 0.5,
+      "ABSENT": 0.0,
+      "LEAVE": 0.0,
+      "HOLIDAY": null,
+      "WEEKLY_OFF": null
+    },
+    "attendance_pct": "sum(weight) / count(records with non-null weight) x 100, pooled over all records in scope (not a mean of employee percentages)",
+    "rounding": "Decimal ROUND_HALF_UP to 2 decimal places",
+    "excluded": "HOLIDAY and WEEKLY_OFF records (null weight) are excluded from numerator and denominator",
+    "missing_records": "an employee-date without a record is unknown; it is neither counted nor ABSENT",
+    "late_arrival": "check_in > 09:30 (records with a check-in time)",
+    "avg_total_hours": "mean of total_hours over records that have total_hours, ROUND_HALF_UP to 2 decimals"
+  },
+  "tenants": {
+    "acme": {
+      "tenant_id": "acme",
+      "name": "Acme Corp",
+      "working_days": 20,
+      "holidays": [
+        {
+          "date": "2026-08-14",
+          "name": "Company holiday"
+        }
+      ],
+      "record_count": 443,
+      "counted_records": 399,
+      "attended_sum": 358.5,
+      "overall_attendance_pct": 89.85,
+      "status_counts": {
+        "PRESENT": 333,
+        "ABSENT": 15,
+        "LEAVE": 19,
+        "WFH": 19,
+        "HALF_DAY": 13,
+        "HOLIDAY": 4,
+        "WEEKLY_OFF": 40
+      },
+      "records_with_hours": 275,
+      "avg_total_hours": 8.96,
+      "late_arrivals": 35,
+      "departments": {
+        "ENG": {
+          "entity_id": "ENG",
+          "department": "Engineering",
+          "source_file": "acme_engineering_biometric_2026-08.csv",
+          "extraction_method": "native_csv",
+          "employee_count": 4,
+          "attendance_pct": 92.41,
+          "counted_days": 79,
+          "attended_sum": 73.0,
+          "status_counts": {
+            "PRESENT": 64,
+            "ABSENT": 2,
+            "LEAVE": 3,
+            "WFH": 8,
+            "HALF_DAY": 2,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "records_with_hours": 66,
+          "avg_total_hours": 8.94,
+          "late_arrivals": 12,
+          "late_arrival_records": [
+            {
+              "record_key": "7e447a00903a9431",
+              "employee_id": "E002",
+              "attendance_date": "2026-08-03",
+              "check_in": "09:54",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "7d6dab3462a7ea19",
+              "employee_id": "E002",
+              "attendance_date": "2026-08-05",
+              "check_in": "09:36",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "cb994b976ac43328",
+              "employee_id": "E004",
+              "attendance_date": "2026-08-07",
+              "check_in": "09:32",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "a3a24912a12a2bc2",
+              "employee_id": "E003",
+              "attendance_date": "2026-08-10",
+              "check_in": "09:54",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "d203bc3157ef78a5",
+              "employee_id": "E002",
+              "attendance_date": "2026-08-11",
+              "check_in": "09:51",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "93ab65dacf9b7fd9",
+              "employee_id": "E001",
+              "attendance_date": "2026-08-13",
+              "check_in": "10:12",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "5a913e88dca6d146",
+              "employee_id": "E003",
+              "attendance_date": "2026-08-13",
+              "check_in": "09:54",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "c63f542e7be87a3a",
+              "employee_id": "E001",
+              "attendance_date": "2026-08-24",
+              "check_in": "09:57",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "5419168acb2ff23c",
+              "employee_id": "E002",
+              "attendance_date": "2026-08-24",
+              "check_in": "10:14",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "07d42d4ac4e33c46",
+              "employee_id": "E003",
+              "attendance_date": "2026-08-25",
+              "check_in": "10:06",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "954672f01ab2e04d",
+              "employee_id": "E003",
+              "attendance_date": "2026-08-26",
+              "check_in": "09:44",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "5e617d6fea50045f",
+              "employee_id": "E004",
+              "attendance_date": "2026-08-27",
+              "check_in": "09:47",
+              "expected_review_status": "auto_accepted"
+            }
+          ],
+          "top_employees": [
+            "E001"
+          ],
+          "bottom_employees": [
+            "E002"
+          ]
+        },
+        "SAL": {
+          "entity_id": "SAL",
+          "department": "Sales",
+          "source_file": "acme_sales_muster_2026-08.xlsx",
+          "extraction_method": "native_xlsx",
+          "employee_count": 4,
+          "attendance_pct": 88.13,
+          "counted_days": 80,
+          "attended_sum": 70.5,
+          "status_counts": {
+            "PRESENT": 68,
+            "ABSENT": 4,
+            "LEAVE": 4,
+            "WFH": 1,
+            "HALF_DAY": 3,
+            "HOLIDAY": 4,
+            "WEEKLY_OFF": 40
+          },
+          "records_with_hours": 0,
+          "avg_total_hours": null,
+          "late_arrivals": 0,
+          "late_arrival_records": [],
+          "top_employees": [
+            "E005",
+            "E008"
+          ],
+          "bottom_employees": [
+            "E006"
+          ]
+        },
+        "OPS": {
+          "entity_id": "OPS",
+          "department": "Operations",
+          "source_file": "acme_operations_weekly_report_2026-08.docx",
+          "extraction_method": "native_docx",
+          "employee_count": 4,
+          "attendance_pct": 83.75,
+          "counted_days": 80,
+          "attended_sum": 67.0,
+          "status_counts": {
+            "PRESENT": 63,
+            "ABSENT": 5,
+            "LEAVE": 6,
+            "WFH": 2,
+            "HALF_DAY": 4,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "records_with_hours": 67,
+          "avg_total_hours": 8.86,
+          "late_arrivals": 13,
+          "late_arrival_records": [
+            {
+              "record_key": "c17c8c0ecdae0e83",
+              "employee_id": "E012",
+              "attendance_date": "2026-08-03",
+              "check_in": "10:01",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "e345855f238a3ca5",
+              "employee_id": "E009",
+              "attendance_date": "2026-08-05",
+              "check_in": "10:05",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "b58478f124f8a5db",
+              "employee_id": "E010",
+              "attendance_date": "2026-08-06",
+              "check_in": "10:05",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "698faf87a50f1777",
+              "employee_id": "E009",
+              "attendance_date": "2026-08-07",
+              "check_in": "09:51",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "2bfade43076b8490",
+              "employee_id": "E011",
+              "attendance_date": "2026-08-11",
+              "check_in": "10:02",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "7344fa3fe7860d4f",
+              "employee_id": "E012",
+              "attendance_date": "2026-08-12",
+              "check_in": "09:41",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "8f7f96bccdc5bd86",
+              "employee_id": "E012",
+              "attendance_date": "2026-08-17",
+              "check_in": "10:04",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "5daf48bfca7d1728",
+              "employee_id": "E010",
+              "attendance_date": "2026-08-19",
+              "check_in": "09:33",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "eababc311618b6d8",
+              "employee_id": "E011",
+              "attendance_date": "2026-08-25",
+              "check_in": "10:05",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "addf557a994fdeed",
+              "employee_id": "E012",
+              "attendance_date": "2026-08-25",
+              "check_in": "09:31",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "238aad8537bee11e",
+              "employee_id": "E009",
+              "attendance_date": "2026-08-26",
+              "check_in": "09:59",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "f3618d8dd5f4ff9c",
+              "employee_id": "E011",
+              "attendance_date": "2026-08-27",
+              "check_in": "09:48",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "342a4d767f3a231a",
+              "employee_id": "E009",
+              "attendance_date": "2026-08-31",
+              "check_in": "10:01",
+              "expected_review_status": "auto_accepted"
+            }
+          ],
+          "top_employees": [
+            "E010",
+            "E012"
+          ],
+          "bottom_employees": [
+            "E011"
+          ]
+        },
+        "FIN": {
+          "entity_id": "FIN",
+          "department": "Finance",
+          "source_file": "acme_finance_attendance_2026-08.pdf",
+          "extraction_method": "pdf_text",
+          "employee_count": 4,
+          "attendance_pct": 95.0,
+          "counted_days": 80,
+          "attended_sum": 76.0,
+          "status_counts": {
+            "PRESENT": 69,
+            "ABSENT": 1,
+            "LEAVE": 2,
+            "WFH": 6,
+            "HALF_DAY": 2,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "records_with_hours": 71,
+          "avg_total_hours": 9.01,
+          "late_arrivals": 4,
+          "late_arrival_records": [
+            {
+              "record_key": "d236798bdd3040af",
+              "employee_id": "E013",
+              "attendance_date": "2026-08-06",
+              "check_in": "10:09",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "7b83c59d65758bf8",
+              "employee_id": "E014",
+              "attendance_date": "2026-08-07",
+              "check_in": "10:15",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "e6a53f06f3087269",
+              "employee_id": "E016",
+              "attendance_date": "2026-08-11",
+              "check_in": "09:42",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "98fc95415d5ca694",
+              "employee_id": "E013",
+              "attendance_date": "2026-08-31",
+              "check_in": "09:33",
+              "expected_review_status": "auto_accepted"
+            }
+          ],
+          "top_employees": [
+            "E016"
+          ],
+          "bottom_employees": [
+            "E013",
+            "E015"
+          ]
+        },
+        "HR": {
+          "entity_id": "HR",
+          "department": "Human Resources",
+          "source_file": "acme_hr_register_scanned_2026-08.pdf",
+          "extraction_method": "ocr",
+          "employee_count": 4,
+          "attendance_pct": 90.0,
+          "counted_days": 80,
+          "attended_sum": 72.0,
+          "status_counts": {
+            "PRESENT": 69,
+            "ABSENT": 3,
+            "LEAVE": 4,
+            "WFH": 2,
+            "HALF_DAY": 2,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "records_with_hours": 71,
+          "avg_total_hours": 9.02,
+          "late_arrivals": 6,
+          "late_arrival_records": [
+            {
+              "record_key": "01013b805fd755b3",
+              "employee_id": "E017",
+              "attendance_date": "2026-08-03",
+              "check_in": "10:08",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "7a1b8e6e9e6e251e",
+              "employee_id": "E018",
+              "attendance_date": "2026-08-19",
+              "check_in": "09:42",
+              "expected_review_status": "needs_review"
+            },
+            {
+              "record_key": "e35c762eb5cadbd6",
+              "employee_id": "E017",
+              "attendance_date": "2026-08-20",
+              "check_in": "09:45",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "dc4f06c9af448612",
+              "employee_id": "E019",
+              "attendance_date": "2026-08-20",
+              "check_in": "10:06",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "0ba82ef9e9389bf4",
+              "employee_id": "E017",
+              "attendance_date": "2026-08-27",
+              "check_in": "10:03",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "049250f63d07fbbb",
+              "employee_id": "E019",
+              "attendance_date": "2026-08-31",
+              "check_in": "10:10",
+              "expected_review_status": "auto_accepted"
+            }
+          ],
+          "top_employees": [
+            "E017"
+          ],
+          "bottom_employees": [
+            "E018"
+          ]
+        }
+      },
+      "department_ranking": [
+        {
+          "rank": 1,
+          "entity_id": "FIN",
+          "department": "Finance",
+          "attendance_pct": 95.0
+        },
+        {
+          "rank": 2,
+          "entity_id": "ENG",
+          "department": "Engineering",
+          "attendance_pct": 92.41
+        },
+        {
+          "rank": 3,
+          "entity_id": "HR",
+          "department": "Human Resources",
+          "attendance_pct": 90.0
+        },
+        {
+          "rank": 4,
+          "entity_id": "SAL",
+          "department": "Sales",
+          "attendance_pct": 88.13
+        },
+        {
+          "rank": 5,
+          "entity_id": "OPS",
+          "department": "Operations",
+          "attendance_pct": 83.75
+        }
+      ],
+      "employees": {
+        "E001": {
+          "employee_id": "E001",
+          "employee_name": "Rahul Sharma",
+          "entity_id": "ENG",
+          "attendance_pct": 95.0,
+          "counted_days": 20,
+          "attended_sum": 19.0,
+          "status_counts": {
+            "PRESENT": 16,
+            "ABSENT": 0,
+            "LEAVE": 1,
+            "WFH": 3,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 2
+        },
+        "E002": {
+          "employee_id": "E002",
+          "employee_name": "Ananya Iyer",
+          "entity_id": "ENG",
+          "attendance_pct": 90.0,
+          "counted_days": 20,
+          "attended_sum": 18.0,
+          "status_counts": {
+            "PRESENT": 17,
+            "ABSENT": 1,
+            "LEAVE": 1,
+            "WFH": 1,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 4
+        },
+        "E003": {
+          "employee_id": "E003",
+          "employee_name": "Vikram Reddy",
+          "entity_id": "ENG",
+          "attendance_pct": 92.11,
+          "counted_days": 19,
+          "attended_sum": 17.5,
+          "status_counts": {
+            "PRESENT": 15,
+            "ABSENT": 0,
+            "LEAVE": 1,
+            "WFH": 2,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 4
+        },
+        "E004": {
+          "employee_id": "E004",
+          "employee_name": "Sneha Kulkarni",
+          "entity_id": "ENG",
+          "attendance_pct": 92.5,
+          "counted_days": 20,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 16,
+            "ABSENT": 1,
+            "LEAVE": 0,
+            "WFH": 2,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 2
+        },
+        "E005": {
+          "employee_id": "E005",
+          "employee_name": "Arjun Mehta",
+          "entity_id": "SAL",
+          "attendance_pct": 92.5,
+          "counted_days": 20,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 1,
+            "LEAVE": 0,
+            "WFH": 0,
+            "HALF_DAY": 1,
+            "HOLIDAY": 1,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        },
+        "E006": {
+          "employee_id": "E006",
+          "employee_name": "Kavya Menon",
+          "entity_id": "SAL",
+          "attendance_pct": 77.5,
+          "counted_days": 20,
+          "attended_sum": 15.5,
+          "status_counts": {
+            "PRESENT": 15,
+            "ABSENT": 2,
+            "LEAVE": 2,
+            "WFH": 0,
+            "HALF_DAY": 1,
+            "HOLIDAY": 1,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        },
+        "E007": {
+          "employee_id": "E007",
+          "employee_name": "Rohan Gupta",
+          "entity_id": "SAL",
+          "attendance_pct": 90.0,
+          "counted_days": 20,
+          "attended_sum": 18.0,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 1,
+            "LEAVE": 1,
+            "WFH": 0,
+            "HALF_DAY": 0,
+            "HOLIDAY": 1,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        },
+        "E008": {
+          "employee_id": "E008",
+          "employee_name": "Divya Pillai",
+          "entity_id": "SAL",
+          "attendance_pct": 92.5,
+          "counted_days": 20,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 17,
+            "ABSENT": 0,
+            "LEAVE": 1,
+            "WFH": 1,
+            "HALF_DAY": 1,
+            "HOLIDAY": 1,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        },
+        "E009": {
+          "employee_id": "E009",
+          "employee_name": "Suresh Patil",
+          "entity_id": "OPS",
+          "attendance_pct": 85.0,
+          "counted_days": 20,
+          "attended_sum": 17.0,
+          "status_counts": {
+            "PRESENT": 16,
+            "ABSENT": 1,
+            "LEAVE": 1,
+            "WFH": 0,
+            "HALF_DAY": 2,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 4
+        },
+        "E010": {
+          "employee_id": "E010",
+          "employee_name": "Priya Nair",
+          "entity_id": "OPS",
+          "attendance_pct": 87.5,
+          "counted_days": 20,
+          "attended_sum": 17.5,
+          "status_counts": {
+            "PRESENT": 17,
+            "ABSENT": 1,
+            "LEAVE": 1,
+            "WFH": 0,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 2
+        },
+        "E011": {
+          "employee_id": "E011",
+          "employee_name": "Manoj Yadav",
+          "entity_id": "OPS",
+          "attendance_pct": 75.0,
+          "counted_days": 20,
+          "attended_sum": 15.0,
+          "status_counts": {
+            "PRESENT": 15,
+            "ABSENT": 3,
+            "LEAVE": 2,
+            "WFH": 0,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 3
+        },
+        "E012": {
+          "employee_id": "E012",
+          "employee_name": "Pooja Desai",
+          "entity_id": "OPS",
+          "attendance_pct": 87.5,
+          "counted_days": 20,
+          "attended_sum": 17.5,
+          "status_counts": {
+            "PRESENT": 15,
+            "ABSENT": 0,
+            "LEAVE": 2,
+            "WFH": 2,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 4
+        },
+        "E013": {
+          "employee_id": "E013",
+          "employee_name": "Nikhil Joshi",
+          "entity_id": "FIN",
+          "attendance_pct": 92.5,
+          "counted_days": 20,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 1,
+            "LEAVE": 0,
+            "WFH": 0,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 2
+        },
+        "E014": {
+          "employee_id": "E014",
+          "employee_name": "Meera Krishnan",
+          "entity_id": "FIN",
+          "attendance_pct": 95.0,
+          "counted_days": 20,
+          "attended_sum": 19.0,
+          "status_counts": {
+            "PRESENT": 17,
+            "ABSENT": 0,
+            "LEAVE": 1,
+            "WFH": 2,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 1
+        },
+        "E015": {
+          "employee_id": "E015",
+          "employee_name": "Aditya Rao",
+          "entity_id": "FIN",
+          "attendance_pct": 92.5,
+          "counted_days": 20,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 15,
+            "ABSENT": 0,
+            "LEAVE": 1,
+            "WFH": 3,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 0
+        },
+        "E016": {
+          "employee_id": "E016",
+          "employee_name": "Lakshmi Subramanian",
+          "entity_id": "FIN",
+          "attendance_pct": 100.0,
+          "counted_days": 20,
+          "attended_sum": 20.0,
+          "status_counts": {
+            "PRESENT": 19,
+            "ABSENT": 0,
+            "LEAVE": 0,
+            "WFH": 1,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 1
+        },
+        "E017": {
+          "employee_id": "E017",
+          "employee_name": "Deepa Chatterjee",
+          "entity_id": "HR",
+          "attendance_pct": 95.0,
+          "counted_days": 20,
+          "attended_sum": 19.0,
+          "status_counts": {
+            "PRESENT": 19,
+            "ABSENT": 0,
+            "LEAVE": 1,
+            "WFH": 0,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 3
+        },
+        "E018": {
+          "employee_id": "E018",
+          "employee_name": "Karan Malhotra",
+          "entity_id": "HR",
+          "attendance_pct": 80.0,
+          "counted_days": 20,
+          "attended_sum": 16.0,
+          "status_counts": {
+            "PRESENT": 15,
+            "ABSENT": 2,
+            "LEAVE": 2,
+            "WFH": 1,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 1
+        },
+        "E019": {
+          "employee_id": "E019",
+          "employee_name": "Neha Bhatt",
+          "entity_id": "HR",
+          "attendance_pct": 92.5,
+          "counted_days": 20,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 17,
+            "ABSENT": 1,
+            "LEAVE": 0,
+            "WFH": 1,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 2
+        },
+        "E020": {
+          "employee_id": "E020",
+          "employee_name": "Sanjay Verma",
+          "entity_id": "HR",
+          "attendance_pct": 92.5,
+          "counted_days": 20,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 0,
+            "LEAVE": 1,
+            "WFH": 0,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 0
+        }
+      },
+      "employee_ranking": [
+        {
+          "rank": 1,
+          "employee_id": "E016",
+          "employee_name": "Lakshmi Subramanian",
+          "entity_id": "FIN",
+          "attendance_pct": 100.0
+        },
+        {
+          "rank": 2,
+          "employee_id": "E001",
+          "employee_name": "Rahul Sharma",
+          "entity_id": "ENG",
+          "attendance_pct": 95.0
+        },
+        {
+          "rank": 3,
+          "employee_id": "E014",
+          "employee_name": "Meera Krishnan",
+          "entity_id": "FIN",
+          "attendance_pct": 95.0
+        },
+        {
+          "rank": 4,
+          "employee_id": "E017",
+          "employee_name": "Deepa Chatterjee",
+          "entity_id": "HR",
+          "attendance_pct": 95.0
+        },
+        {
+          "rank": 5,
+          "employee_id": "E004",
+          "employee_name": "Sneha Kulkarni",
+          "entity_id": "ENG",
+          "attendance_pct": 92.5
+        },
+        {
+          "rank": 6,
+          "employee_id": "E005",
+          "employee_name": "Arjun Mehta",
+          "entity_id": "SAL",
+          "attendance_pct": 92.5
+        },
+        {
+          "rank": 7,
+          "employee_id": "E008",
+          "employee_name": "Divya Pillai",
+          "entity_id": "SAL",
+          "attendance_pct": 92.5
+        },
+        {
+          "rank": 8,
+          "employee_id": "E013",
+          "employee_name": "Nikhil Joshi",
+          "entity_id": "FIN",
+          "attendance_pct": 92.5
+        },
+        {
+          "rank": 9,
+          "employee_id": "E015",
+          "employee_name": "Aditya Rao",
+          "entity_id": "FIN",
+          "attendance_pct": 92.5
+        },
+        {
+          "rank": 10,
+          "employee_id": "E019",
+          "employee_name": "Neha Bhatt",
+          "entity_id": "HR",
+          "attendance_pct": 92.5
+        },
+        {
+          "rank": 11,
+          "employee_id": "E020",
+          "employee_name": "Sanjay Verma",
+          "entity_id": "HR",
+          "attendance_pct": 92.5
+        },
+        {
+          "rank": 12,
+          "employee_id": "E003",
+          "employee_name": "Vikram Reddy",
+          "entity_id": "ENG",
+          "attendance_pct": 92.11
+        },
+        {
+          "rank": 13,
+          "employee_id": "E002",
+          "employee_name": "Ananya Iyer",
+          "entity_id": "ENG",
+          "attendance_pct": 90.0
+        },
+        {
+          "rank": 14,
+          "employee_id": "E007",
+          "employee_name": "Rohan Gupta",
+          "entity_id": "SAL",
+          "attendance_pct": 90.0
+        },
+        {
+          "rank": 15,
+          "employee_id": "E010",
+          "employee_name": "Priya Nair",
+          "entity_id": "OPS",
+          "attendance_pct": 87.5
+        },
+        {
+          "rank": 16,
+          "employee_id": "E012",
+          "employee_name": "Pooja Desai",
+          "entity_id": "OPS",
+          "attendance_pct": 87.5
+        },
+        {
+          "rank": 17,
+          "employee_id": "E009",
+          "employee_name": "Suresh Patil",
+          "entity_id": "OPS",
+          "attendance_pct": 85.0
+        },
+        {
+          "rank": 18,
+          "employee_id": "E018",
+          "employee_name": "Karan Malhotra",
+          "entity_id": "HR",
+          "attendance_pct": 80.0
+        },
+        {
+          "rank": 19,
+          "employee_id": "E006",
+          "employee_name": "Kavya Menon",
+          "entity_id": "SAL",
+          "attendance_pct": 77.5
+        },
+        {
+          "rank": 20,
+          "employee_id": "E011",
+          "employee_name": "Manoj Yadav",
+          "entity_id": "OPS",
+          "attendance_pct": 75.0
+        }
+      ],
+      "highest_employee": {
+        "employee_id": "E016",
+        "employee_name": "Lakshmi Subramanian",
+        "entity_id": "FIN",
+        "attendance_pct": 100.0
+      },
+      "lowest_employee": {
+        "employee_id": "E011",
+        "employee_name": "Manoj Yadav",
+        "entity_id": "OPS",
+        "attendance_pct": 75.0
+      },
+      "missing_records": [
+        {
+          "employee_id": "E003",
+          "employee_name": "Vikram Reddy",
+          "entity_id": "ENG",
+          "attendance_date": "2026-08-20",
+          "source_file": "acme_engineering_biometric_2026-08.csv",
+          "treat_as": "unknown - a missing record is not an absence"
+        }
+      ],
+      "restricted_remarks": [
+        {
+          "record_key": "456dfcfa0a268ac2",
+          "employee_id": "E002",
+          "employee_name": "Ananya Iyer",
+          "entity_id": "ENG",
+          "attendance_date": "2026-08-27",
+          "status": "LEAVE",
+          "source_file": "acme_engineering_biometric_2026-08.csv",
+          "source_page_or_row": "row 39",
+          "remarks": "Casual leave - reachable on +91-98765-43210",
+          "pii_types": [
+            "phone"
+          ]
+        },
+        {
+          "record_key": "163fc753529ed8ec",
+          "employee_id": "E003",
+          "employee_name": "Vikram Reddy",
+          "entity_id": "ENG",
+          "attendance_date": "2026-08-18",
+          "status": "LEAVE",
+          "source_file": "acme_engineering_biometric_2026-08.csv",
+          "source_page_or_row": "row 52",
+          "remarks": "Sick leave - viral fever, medical certificate submitted",
+          "pii_types": [
+            "medical"
+          ]
+        },
+        {
+          "record_key": "c0ca074da01e0024",
+          "employee_id": "E004",
+          "employee_name": "Sneha Kulkarni",
+          "entity_id": "ENG",
+          "attendance_date": "2026-08-11",
+          "status": "HALF_DAY",
+          "source_file": "acme_engineering_biometric_2026-08.csv",
+          "source_page_or_row": "row 67",
+          "remarks": "Half day - medical appointment",
+          "pii_types": [
+            "medical"
+          ]
+        },
+        {
+          "record_key": "07337adedf83d717",
+          "employee_id": "E015",
+          "employee_name": "Aditya Rao",
+          "entity_id": "FIN",
+          "attendance_date": "2026-08-05",
+          "status": "LEAVE",
+          "source_file": "acme_finance_attendance_2026-08.pdf",
+          "source_page_or_row": "page 1, row 11",
+          "remarks": "Sick leave - viral fever, medical certificate submitted",
+          "pii_types": [
+            "medical"
+          ]
+        },
+        {
+          "record_key": "f566ef4c43159d7c",
+          "employee_id": "E011",
+          "employee_name": "Manoj Yadav",
+          "entity_id": "OPS",
+          "attendance_date": "2026-08-19",
+          "status": "LEAVE",
+          "source_file": "acme_operations_weekly_report_2026-08.docx",
+          "source_page_or_row": "table 3, row 11",
+          "remarks": "Sick leave - hospitalised, doctor's note on file",
+          "pii_types": [
+            "medical"
+          ]
+        },
+        {
+          "record_key": "0f12486c45606976",
+          "employee_id": "E011",
+          "employee_name": "Manoj Yadav",
+          "entity_id": "OPS",
+          "attendance_date": "2026-08-20",
+          "status": "LEAVE",
+          "source_file": "acme_operations_weekly_report_2026-08.docx",
+          "source_page_or_row": "table 3, row 15",
+          "remarks": "Sick leave - hospitalised, doctor's note on file",
+          "pii_types": [
+            "medical"
+          ]
+        }
+      ],
+      "needs_review_records": [
+        {
+          "record_key": "9fb901162e5e0469",
+          "employee_id": "E019",
+          "employee_name": "Neha Bhatt",
+          "entity_id": "HR",
+          "attendance_date": "2026-08-11",
+          "status": "HALF_DAY",
+          "source_file": "acme_hr_register_scanned_2026-08.pdf",
+          "source_page_or_row": "page 2, row 7",
+          "degraded_field": "status",
+          "degradation": "smudge",
+          "true_value": "HD"
+        },
+        {
+          "record_key": "7a1b8e6e9e6e251e",
+          "employee_id": "E018",
+          "employee_name": "Karan Malhotra",
+          "entity_id": "HR",
+          "attendance_date": "2026-08-19",
+          "status": "PRESENT",
+          "source_file": "acme_hr_register_scanned_2026-08.pdf",
+          "source_page_or_row": "page 3, row 10",
+          "degraded_field": "check_in",
+          "degradation": "faint",
+          "true_value": "09:42"
+        }
+      ],
+      "daily_status": {
+        "2026-08-01": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-02": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-03": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E004",
+            "E005",
+            "E006",
+            "E008",
+            "E010",
+            "E012",
+            "E013",
+            "E014",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [
+            "E011"
+          ],
+          "LEAVE": [
+            "E007"
+          ],
+          "WFH": [
+            "E003"
+          ],
+          "HALF_DAY": [
+            "E009",
+            "E015"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-04": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E010",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [
+            "E011",
+            "E013"
+          ],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [
+            "E009",
+            "E012"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-05": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E016",
+            "E017",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [
+            "E004"
+          ],
+          "LEAVE": [
+            "E015",
+            "E018"
+          ],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-06": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [
+            "E004",
+            "E014"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-07": {
+          "PRESENT": [
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E020"
+          ],
+          "ABSENT": [
+            "E007",
+            "E018",
+            "E019"
+          ],
+          "LEAVE": [
+            "E006"
+          ],
+          "WFH": [
+            "E001"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-08": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-09": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-10": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E005",
+            "E007",
+            "E009",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [
+            "E010"
+          ],
+          "LEAVE": [],
+          "WFH": [
+            "E004",
+            "E008"
+          ],
+          "HALF_DAY": [
+            "E006"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-11": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E018",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E017"
+          ],
+          "WFH": [],
+          "HALF_DAY": [
+            "E004",
+            "E005",
+            "E019"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-12": {
+          "PRESENT": [
+            "E003",
+            "E004",
+            "E005",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [
+            "E002",
+            "E006"
+          ],
+          "LEAVE": [],
+          "WFH": [
+            "E001",
+            "E015"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-13": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [
+            "E018"
+          ],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [
+            "E010"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-14": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ],
+          "WEEKLY_OFF": []
+        },
+        "2026-08-15": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-16": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-17": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E009"
+          ],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-18": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E004",
+            "E005",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E003",
+            "E006"
+          ],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-19": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E013",
+            "E014",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [
+            "E006"
+          ],
+          "LEAVE": [
+            "E011"
+          ],
+          "WFH": [
+            "E012",
+            "E015",
+            "E016"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-20": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E012",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E010",
+            "E011"
+          ],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": [
+            "E003"
+          ]
+        },
+        "2026-08-21": {
+          "PRESENT": [
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E014",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E001"
+          ],
+          "WFH": [
+            "E015"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-22": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-23": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-24": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E004",
+            "E006",
+            "E007",
+            "E009",
+            "E010",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E019"
+          ],
+          "ABSENT": [
+            "E005",
+            "E011"
+          ],
+          "LEAVE": [
+            "E018",
+            "E020"
+          ],
+          "WFH": [
+            "E012"
+          ],
+          "HALF_DAY": [
+            "E003",
+            "E008"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-25": {
+          "PRESENT": [
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [
+            "E001",
+            "E014"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-26": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [
+            "E013"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-27": {
+          "PRESENT": [
+            "E001",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E010",
+            "E011",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E019"
+          ],
+          "ABSENT": [
+            "E009"
+          ],
+          "LEAVE": [
+            "E002",
+            "E012"
+          ],
+          "WFH": [],
+          "HALF_DAY": [
+            "E020"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-28": {
+          "PRESENT": [
+            "E001",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010",
+            "E011",
+            "E012",
+            "E013",
+            "E015",
+            "E016",
+            "E017",
+            "E018",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E014"
+          ],
+          "WFH": [
+            "E002",
+            "E019"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-29": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-30": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        "2026-08-31": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E009",
+            "E010",
+            "E011",
+            "E013",
+            "E014",
+            "E015",
+            "E016",
+            "E017",
+            "E019",
+            "E020"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E008",
+            "E012"
+          ],
+          "WFH": [
+            "E003",
+            "E018"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        }
+      }
+    },
+    "globex": {
+      "tenant_id": "globex",
+      "name": "Globex Ltd",
+      "working_days": 21,
+      "holidays": [],
+      "record_count": 260,
+      "counted_records": 210,
+      "attended_sum": 192.5,
+      "overall_attendance_pct": 91.67,
+      "status_counts": {
+        "PRESENT": 179,
+        "ABSENT": 6,
+        "LEAVE": 8,
+        "WFH": 10,
+        "HALF_DAY": 7,
+        "HOLIDAY": 0,
+        "WEEKLY_OFF": 50
+      },
+      "records_with_hours": 92,
+      "avg_total_hours": 9.01,
+      "late_arrivals": 8,
+      "departments": {
+        "ENG": {
+          "entity_id": "ENG",
+          "department": "Engineering",
+          "source_file": "globex_engineering_biometric_2026-08.csv",
+          "extraction_method": "native_csv",
+          "employee_count": 5,
+          "attendance_pct": 93.81,
+          "counted_days": 105,
+          "attended_sum": 98.5,
+          "status_counts": {
+            "PRESENT": 89,
+            "ABSENT": 2,
+            "LEAVE": 3,
+            "WFH": 8,
+            "HALF_DAY": 3,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "records_with_hours": 92,
+          "avg_total_hours": 9.01,
+          "late_arrivals": 8,
+          "late_arrival_records": [
+            {
+              "record_key": "05ad7cfbd6a23893",
+              "employee_id": "E002",
+              "attendance_date": "2026-08-03",
+              "check_in": "10:04",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "39fc2a7597eae560",
+              "employee_id": "E002",
+              "attendance_date": "2026-08-05",
+              "check_in": "10:05",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "f5c9095edad8d55e",
+              "employee_id": "E005",
+              "attendance_date": "2026-08-05",
+              "check_in": "09:44",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "be590110f2850a9f",
+              "employee_id": "E002",
+              "attendance_date": "2026-08-12",
+              "check_in": "09:43",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "295edb7b2c3fe638",
+              "employee_id": "E003",
+              "attendance_date": "2026-08-12",
+              "check_in": "09:55",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "bb1a828f256b3325",
+              "employee_id": "E003",
+              "attendance_date": "2026-08-24",
+              "check_in": "09:58",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "d37b82f6f6ba91e4",
+              "employee_id": "E005",
+              "attendance_date": "2026-08-25",
+              "check_in": "10:07",
+              "expected_review_status": "auto_accepted"
+            },
+            {
+              "record_key": "6ea08967dab8de56",
+              "employee_id": "E004",
+              "attendance_date": "2026-08-27",
+              "check_in": "10:05",
+              "expected_review_status": "auto_accepted"
+            }
+          ],
+          "top_employees": [
+            "E005"
+          ],
+          "bottom_employees": [
+            "E001"
+          ]
+        },
+        "SUP": {
+          "entity_id": "SUP",
+          "department": "Support",
+          "source_file": "globex_support_muster_2026-08.xlsx",
+          "extraction_method": "native_xlsx",
+          "employee_count": 5,
+          "attendance_pct": 89.52,
+          "counted_days": 105,
+          "attended_sum": 94.0,
+          "status_counts": {
+            "PRESENT": 90,
+            "ABSENT": 4,
+            "LEAVE": 5,
+            "WFH": 2,
+            "HALF_DAY": 4,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 50
+          },
+          "records_with_hours": 0,
+          "avg_total_hours": null,
+          "late_arrivals": 0,
+          "late_arrival_records": [],
+          "top_employees": [
+            "E010"
+          ],
+          "bottom_employees": [
+            "E009"
+          ]
+        }
+      },
+      "department_ranking": [
+        {
+          "rank": 1,
+          "entity_id": "ENG",
+          "department": "Engineering",
+          "attendance_pct": 93.81
+        },
+        {
+          "rank": 2,
+          "entity_id": "SUP",
+          "department": "Support",
+          "attendance_pct": 89.52
+        }
+      ],
+      "employees": {
+        "E001": {
+          "employee_id": "E001",
+          "employee_name": "Rahul Sharma",
+          "entity_id": "ENG",
+          "attendance_pct": 88.1,
+          "counted_days": 21,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 16,
+            "ABSENT": 0,
+            "LEAVE": 2,
+            "WFH": 2,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 0
+        },
+        "E002": {
+          "employee_id": "E002",
+          "employee_name": "Aisha Khan",
+          "entity_id": "ENG",
+          "attendance_pct": 95.24,
+          "counted_days": 21,
+          "attended_sum": 20.0,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 1,
+            "LEAVE": 0,
+            "WFH": 2,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 3
+        },
+        "E003": {
+          "employee_id": "E003",
+          "employee_name": "Varun Chopra",
+          "entity_id": "ENG",
+          "attendance_pct": 95.24,
+          "counted_days": 21,
+          "attended_sum": 20.0,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 0,
+            "LEAVE": 0,
+            "WFH": 1,
+            "HALF_DAY": 2,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 2
+        },
+        "E004": {
+          "employee_id": "E004",
+          "employee_name": "Swati Agarwal",
+          "entity_id": "ENG",
+          "attendance_pct": 90.48,
+          "counted_days": 21,
+          "attended_sum": 19.0,
+          "status_counts": {
+            "PRESENT": 17,
+            "ABSENT": 1,
+            "LEAVE": 1,
+            "WFH": 2,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 1
+        },
+        "E005": {
+          "employee_id": "E005",
+          "employee_name": "Harish Naidu",
+          "entity_id": "ENG",
+          "attendance_pct": 100.0,
+          "counted_days": 21,
+          "attended_sum": 21.0,
+          "status_counts": {
+            "PRESENT": 20,
+            "ABSENT": 0,
+            "LEAVE": 0,
+            "WFH": 1,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "late_arrivals": 2
+        },
+        "E006": {
+          "employee_id": "E006",
+          "employee_name": "Farhan Qureshi",
+          "entity_id": "SUP",
+          "attendance_pct": 88.1,
+          "counted_days": 21,
+          "attended_sum": 18.5,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 1,
+            "LEAVE": 1,
+            "WFH": 0,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        },
+        "E007": {
+          "employee_id": "E007",
+          "employee_name": "Priya Nair",
+          "entity_id": "SUP",
+          "attendance_pct": 92.86,
+          "counted_days": 21,
+          "attended_sum": 19.5,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 1,
+            "LEAVE": 0,
+            "WFH": 1,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        },
+        "E008": {
+          "employee_id": "E008",
+          "employee_name": "Ritu Saxena",
+          "entity_id": "SUP",
+          "attendance_pct": 90.48,
+          "counted_days": 21,
+          "attended_sum": 19.0,
+          "status_counts": {
+            "PRESENT": 19,
+            "ABSENT": 1,
+            "LEAVE": 1,
+            "WFH": 0,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        },
+        "E009": {
+          "employee_id": "E009",
+          "employee_name": "Gaurav Sinha",
+          "entity_id": "SUP",
+          "attendance_pct": 80.95,
+          "counted_days": 21,
+          "attended_sum": 17.0,
+          "status_counts": {
+            "PRESENT": 17,
+            "ABSENT": 1,
+            "LEAVE": 3,
+            "WFH": 0,
+            "HALF_DAY": 0,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        },
+        "E010": {
+          "employee_id": "E010",
+          "employee_name": "Tanvi Shetty",
+          "entity_id": "SUP",
+          "attendance_pct": 95.24,
+          "counted_days": 21,
+          "attended_sum": 20.0,
+          "status_counts": {
+            "PRESENT": 18,
+            "ABSENT": 0,
+            "LEAVE": 0,
+            "WFH": 1,
+            "HALF_DAY": 2,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 10
+          },
+          "late_arrivals": 0
+        }
+      },
+      "employee_ranking": [
+        {
+          "rank": 1,
+          "employee_id": "E005",
+          "employee_name": "Harish Naidu",
+          "entity_id": "ENG",
+          "attendance_pct": 100.0
+        },
+        {
+          "rank": 2,
+          "employee_id": "E002",
+          "employee_name": "Aisha Khan",
+          "entity_id": "ENG",
+          "attendance_pct": 95.24
+        },
+        {
+          "rank": 3,
+          "employee_id": "E003",
+          "employee_name": "Varun Chopra",
+          "entity_id": "ENG",
+          "attendance_pct": 95.24
+        },
+        {
+          "rank": 4,
+          "employee_id": "E010",
+          "employee_name": "Tanvi Shetty",
+          "entity_id": "SUP",
+          "attendance_pct": 95.24
+        },
+        {
+          "rank": 5,
+          "employee_id": "E007",
+          "employee_name": "Priya Nair",
+          "entity_id": "SUP",
+          "attendance_pct": 92.86
+        },
+        {
+          "rank": 6,
+          "employee_id": "E004",
+          "employee_name": "Swati Agarwal",
+          "entity_id": "ENG",
+          "attendance_pct": 90.48
+        },
+        {
+          "rank": 7,
+          "employee_id": "E008",
+          "employee_name": "Ritu Saxena",
+          "entity_id": "SUP",
+          "attendance_pct": 90.48
+        },
+        {
+          "rank": 8,
+          "employee_id": "E001",
+          "employee_name": "Rahul Sharma",
+          "entity_id": "ENG",
+          "attendance_pct": 88.1
+        },
+        {
+          "rank": 9,
+          "employee_id": "E006",
+          "employee_name": "Farhan Qureshi",
+          "entity_id": "SUP",
+          "attendance_pct": 88.1
+        },
+        {
+          "rank": 10,
+          "employee_id": "E009",
+          "employee_name": "Gaurav Sinha",
+          "entity_id": "SUP",
+          "attendance_pct": 80.95
+        }
+      ],
+      "highest_employee": {
+        "employee_id": "E005",
+        "employee_name": "Harish Naidu",
+        "entity_id": "ENG",
+        "attendance_pct": 100.0
+      },
+      "lowest_employee": {
+        "employee_id": "E009",
+        "employee_name": "Gaurav Sinha",
+        "entity_id": "SUP",
+        "attendance_pct": 80.95
+      },
+      "missing_records": [],
+      "restricted_remarks": [
+        {
+          "record_key": "9fc4a8b15a05370c",
+          "employee_id": "E004",
+          "employee_name": "Swati Agarwal",
+          "entity_id": "ENG",
+          "attendance_date": "2026-08-10",
+          "status": "LEAVE",
+          "source_file": "globex_engineering_biometric_2026-08.csv",
+          "source_page_or_row": "row 70",
+          "remarks": "Sick leave - viral fever, medical certificate submitted",
+          "pii_types": [
+            "medical"
+          ]
+        }
+      ],
+      "needs_review_records": [],
+      "daily_status": {
+        "2026-08-01": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-02": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-03": {
+          "PRESENT": [
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [
+            "E001"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-04": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-05": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E009"
+          ],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-06": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E010"
+          ],
+          "ABSENT": [
+            "E008"
+          ],
+          "LEAVE": [
+            "E009"
+          ],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-07": {
+          "PRESENT": [
+            "E002",
+            "E003",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E001"
+          ],
+          "WFH": [
+            "E004"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-08": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-09": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-10": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E005",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [
+            "E006"
+          ],
+          "LEAVE": [
+            "E004"
+          ],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-11": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E009"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E008"
+          ],
+          "WFH": [],
+          "HALF_DAY": [
+            "E010"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-12": {
+          "PRESENT": [
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E009"
+          ],
+          "WFH": [],
+          "HALF_DAY": [
+            "E001"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-13": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-14": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E004",
+            "E005",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [
+            "E007"
+          ],
+          "LEAVE": [
+            "E006"
+          ],
+          "WFH": [],
+          "HALF_DAY": [
+            "E003"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-15": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-16": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-17": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E008",
+            "E009"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [
+            "E007",
+            "E010"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-18": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-19": {
+          "PRESENT": [
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [
+            "E001",
+            "E002"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-20": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [
+            "E005"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-21": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-22": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-23": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-24": {
+          "PRESENT": [
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [
+            "E001"
+          ],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-25": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [
+            "E004"
+          ],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-26": {
+          "PRESENT": [
+            "E001",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009"
+          ],
+          "ABSENT": [
+            "E002"
+          ],
+          "LEAVE": [],
+          "WFH": [
+            "E003",
+            "E004"
+          ],
+          "HALF_DAY": [
+            "E010"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-27": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E010"
+          ],
+          "ABSENT": [
+            "E009"
+          ],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-28": {
+          "PRESENT": [
+            "E001",
+            "E002",
+            "E004",
+            "E005",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [
+            "E003",
+            "E006",
+            "E007"
+          ],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        },
+        "2026-08-29": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-30": {
+          "PRESENT": [],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        },
+        "2026-08-31": {
+          "PRESENT": [
+            "E001",
+            "E003",
+            "E004",
+            "E005",
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "ABSENT": [],
+          "LEAVE": [],
+          "WFH": [
+            "E002"
+          ],
+          "HALF_DAY": [],
+          "HOLIDAY": [],
+          "WEEKLY_OFF": [],
+          "NO_RECORD": []
+        }
+      }
+    }
+  },
+  "variants": {
+    "acme_excluding_needs_review": {
+      "description": "Acme facts recomputed without the records whose expected_review_status is needs_review.",
+      "excluded_record_keys": [
+        "9fb901162e5e0469",
+        "7a1b8e6e9e6e251e"
+      ],
+      "overall": {
+        "attendance_pct": 89.92,
+        "counted_days": 397,
+        "attended_sum": 357.0,
+        "status_counts": {
+          "PRESENT": 332,
+          "ABSENT": 15,
+          "LEAVE": 19,
+          "WFH": 19,
+          "HALF_DAY": 12,
+          "HOLIDAY": 4,
+          "WEEKLY_OFF": 40
+        },
+        "late_arrivals": 34
+      },
+      "departments": {
+        "HR": {
+          "attendance_pct": 90.38,
+          "counted_days": 78,
+          "attended_sum": 70.5,
+          "status_counts": {
+            "PRESENT": 68,
+            "ABSENT": 3,
+            "LEAVE": 4,
+            "WFH": 2,
+            "HALF_DAY": 1,
+            "HOLIDAY": 0,
+            "WEEKLY_OFF": 0
+          },
+          "avg_total_hours": 9.09,
+          "late_arrivals": 5
+        }
+      }
+    }
+  },
+  "changed_file_effect": {
+    "employee_E002_attendance_pct": {
+      "before": 90.0,
+      "after": 95.0
+    },
+    "department_ENG_attendance_pct": {
+      "before": 92.41,
+      "after": 93.67
+    },
+    "tenant_acme_overall_attendance_pct": {
+      "before": 89.85,
+      "after": 90.1
+    },
+    "department_ENG_status_counts": {
+      "before": {
+        "PRESENT": 64,
+        "ABSENT": 2,
+        "LEAVE": 3,
+        "WFH": 8,
+        "HALF_DAY": 2,
+        "HOLIDAY": 0,
+        "WEEKLY_OFF": 0
+      },
+      "after": {
+        "PRESENT": 65,
+        "ABSENT": 1,
+        "LEAVE": 3,
+        "WFH": 8,
+        "HALF_DAY": 2,
+        "HOLIDAY": 0,
+        "WEEKLY_OFF": 0
+      }
+    },
+    "department_ENG_avg_total_hours": {
+      "before": 8.94,
+      "after": 8.97
+    }
+  }
+}

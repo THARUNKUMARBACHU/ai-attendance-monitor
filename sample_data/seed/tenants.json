@@ -1,0 +1,529 @@
+{
+  "description": "Synthetic seed data for the Attendance Intelligence sample-data package. All people, companies and contact details are fictitious.",
+  "period": {
+    "start": "2026-08-01",
+    "end": "2026-08-31"
+  },
+  "products": [
+    {
+      "product_id": "hrms",
+      "name": "HRMS",
+      "modules": [
+        {
+          "module_id": "attendance",
+          "name": "Attendance"
+        }
+      ]
+    }
+  ],
+  "classification_levels": [
+    "public",
+    "internal",
+    "confidential",
+    "restricted"
+  ],
+  "roles": {
+    "admin": {
+      "scope": "tenant",
+      "clearance": "restricted",
+      "permissions": [
+        "ingest",
+        "query",
+        "export",
+        "feedback:submit",
+        "audit:read"
+      ]
+    },
+    "manager": {
+      "scope": "department",
+      "clearance": "confidential",
+      "permissions": [
+        "query",
+        "export"
+      ]
+    },
+    "employee": {
+      "scope": "self",
+      "clearance": "confidential",
+      "permissions": [
+        "query",
+        "export"
+      ]
+    }
+  },
+  "tenants": [
+    {
+      "tenant_id": "acme",
+      "name": "Acme Corp",
+      "config": {
+        "timezone": "Asia/Kolkata",
+        "date_format": "DD/MM/YYYY",
+        "week_off_days": [
+          "SAT",
+          "SUN"
+        ],
+        "late_arrival_after": "09:30",
+        "ocr_review_threshold": 0.8,
+        "status_codes": {
+          "P": "PRESENT",
+          "Present": "PRESENT",
+          "A": "ABSENT",
+          "Absent": "ABSENT",
+          "L": "LEAVE",
+          "Leave": "LEAVE",
+          "WFH": "WFH",
+          "Work From Home": "WFH",
+          "HD": "HALF_DAY",
+          "Half Day": "HALF_DAY",
+          "H": "HOLIDAY",
+          "Holiday": "HOLIDAY",
+          "WO": "WEEKLY_OFF",
+          "Weekly Off": "WEEKLY_OFF"
+        },
+        "attendance_formula": {
+          "weights": {
+            "PRESENT": 1.0,
+            "WFH": 1.0,
+            "HALF_DAY": 0.5,
+            "ABSENT": 0.0,
+            "LEAVE": 0.0,
+            "HOLIDAY": null,
+            "WEEKLY_OFF": null
+          },
+          "null_weight": "excluded from the denominator",
+          "aggregation": "pooled: sum(weights) / count(records with non-null weight) x 100 over all records in scope",
+          "rounding": {
+            "mode": "half_up",
+            "decimals": 2
+          }
+        }
+      },
+      "departments": [
+        {
+          "entity_id": "ENG",
+          "name": "Engineering",
+          "manager_employee_id": "E001",
+          "employee_ids": [
+            "E001",
+            "E002",
+            "E003",
+            "E004"
+          ]
+        },
+        {
+          "entity_id": "SAL",
+          "name": "Sales",
+          "manager_employee_id": "E005",
+          "employee_ids": [
+            "E005",
+            "E006",
+            "E007",
+            "E008"
+          ]
+        },
+        {
+          "entity_id": "OPS",
+          "name": "Operations",
+          "manager_employee_id": "E009",
+          "employee_ids": [
+            "E009",
+            "E010",
+            "E011",
+            "E012"
+          ]
+        },
+        {
+          "entity_id": "FIN",
+          "name": "Finance",
+          "manager_employee_id": "E013",
+          "employee_ids": [
+            "E013",
+            "E014",
+            "E015",
+            "E016"
+          ]
+        },
+        {
+          "entity_id": "HR",
+          "name": "Human Resources",
+          "manager_employee_id": "E017",
+          "employee_ids": [
+            "E017",
+            "E018",
+            "E019",
+            "E020"
+          ]
+        }
+      ],
+      "holidays": [
+        {
+          "date": "2026-08-14",
+          "name": "Company holiday"
+        }
+      ],
+      "employees": [
+        {
+          "employee_id": "E001",
+          "name": "Rahul Sharma",
+          "entity_id": "ENG",
+          "email": "e001@acme.example.com",
+          "is_manager": true
+        },
+        {
+          "employee_id": "E002",
+          "name": "Ananya Iyer",
+          "entity_id": "ENG",
+          "email": "e002@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E003",
+          "name": "Vikram Reddy",
+          "entity_id": "ENG",
+          "email": "e003@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E004",
+          "name": "Sneha Kulkarni",
+          "entity_id": "ENG",
+          "email": "e004@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E005",
+          "name": "Arjun Mehta",
+          "entity_id": "SAL",
+          "email": "e005@acme.example.com",
+          "is_manager": true
+        },
+        {
+          "employee_id": "E006",
+          "name": "Kavya Menon",
+          "entity_id": "SAL",
+          "email": "e006@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E007",
+          "name": "Rohan Gupta",
+          "entity_id": "SAL",
+          "email": "e007@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E008",
+          "name": "Divya Pillai",
+          "entity_id": "SAL",
+          "email": "e008@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E009",
+          "name": "Suresh Patil",
+          "entity_id": "OPS",
+          "email": "e009@acme.example.com",
+          "is_manager": true
+        },
+        {
+          "employee_id": "E010",
+          "name": "Priya Nair",
+          "entity_id": "OPS",
+          "email": "e010@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E011",
+          "name": "Manoj Yadav",
+          "entity_id": "OPS",
+          "email": "e011@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E012",
+          "name": "Pooja Desai",
+          "entity_id": "OPS",
+          "email": "e012@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E013",
+          "name": "Nikhil Joshi",
+          "entity_id": "FIN",
+          "email": "e013@acme.example.com",
+          "is_manager": true
+        },
+        {
+          "employee_id": "E014",
+          "name": "Meera Krishnan",
+          "entity_id": "FIN",
+          "email": "e014@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E015",
+          "name": "Aditya Rao",
+          "entity_id": "FIN",
+          "email": "e015@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E016",
+          "name": "Lakshmi Subramanian",
+          "entity_id": "FIN",
+          "email": "e016@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E017",
+          "name": "Deepa Chatterjee",
+          "entity_id": "HR",
+          "email": "e017@acme.example.com",
+          "is_manager": true
+        },
+        {
+          "employee_id": "E018",
+          "name": "Karan Malhotra",
+          "entity_id": "HR",
+          "email": "e018@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E019",
+          "name": "Neha Bhatt",
+          "entity_id": "HR",
+          "email": "e019@acme.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E020",
+          "name": "Sanjay Verma",
+          "entity_id": "HR",
+          "email": "e020@acme.example.com",
+          "is_manager": false
+        }
+      ],
+      "users": [
+        {
+          "user_id": "acme.admin",
+          "tenant_id": "acme",
+          "role": "admin",
+          "display_name": "Acme Corp Administrator",
+          "email": "admin@acme.example.com",
+          "employee_id": null,
+          "entity_scope": [
+            "ENG",
+            "SAL",
+            "OPS",
+            "FIN",
+            "HR"
+          ]
+        },
+        {
+          "user_id": "acme.eng.manager",
+          "tenant_id": "acme",
+          "role": "manager",
+          "display_name": "Rahul Sharma",
+          "email": "e001@acme.example.com",
+          "employee_id": "E001",
+          "entity_scope": [
+            "ENG"
+          ]
+        },
+        {
+          "user_id": "acme.employee",
+          "tenant_id": "acme",
+          "role": "employee",
+          "display_name": "Kavya Menon",
+          "email": "e006@acme.example.com",
+          "employee_id": "E006",
+          "entity_scope": [
+            "SAL"
+          ]
+        }
+      ]
+    },
+    {
+      "tenant_id": "globex",
+      "name": "Globex Ltd",
+      "config": {
+        "timezone": "Asia/Kolkata",
+        "date_format": "DD/MM/YYYY",
+        "week_off_days": [
+          "SAT",
+          "SUN"
+        ],
+        "late_arrival_after": "09:30",
+        "ocr_review_threshold": 0.8,
+        "status_codes": {
+          "P": "PRESENT",
+          "Present": "PRESENT",
+          "A": "ABSENT",
+          "Absent": "ABSENT",
+          "L": "LEAVE",
+          "Leave": "LEAVE",
+          "WFH": "WFH",
+          "Work From Home": "WFH",
+          "HD": "HALF_DAY",
+          "Half Day": "HALF_DAY",
+          "H": "HOLIDAY",
+          "Holiday": "HOLIDAY",
+          "WO": "WEEKLY_OFF",
+          "Weekly Off": "WEEKLY_OFF"
+        },
+        "attendance_formula": {
+          "weights": {
+            "PRESENT": 1.0,
+            "WFH": 1.0,
+            "HALF_DAY": 0.5,
+            "ABSENT": 0.0,
+            "LEAVE": 0.0,
+            "HOLIDAY": null,
+            "WEEKLY_OFF": null
+          },
+          "null_weight": "excluded from the denominator",
+          "aggregation": "pooled: sum(weights) / count(records with non-null weight) x 100 over all records in scope",
+          "rounding": {
+            "mode": "half_up",
+            "decimals": 2
+          }
+        }
+      },
+      "departments": [
+        {
+          "entity_id": "ENG",
+          "name": "Engineering",
+          "manager_employee_id": "E001",
+          "employee_ids": [
+            "E001",
+            "E002",
+            "E003",
+            "E004",
+            "E005"
+          ]
+        },
+        {
+          "entity_id": "SUP",
+          "name": "Support",
+          "manager_employee_id": "E006",
+          "employee_ids": [
+            "E006",
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ]
+        }
+      ],
+      "holidays": [],
+      "employees": [
+        {
+          "employee_id": "E001",
+          "name": "Rahul Sharma",
+          "entity_id": "ENG",
+          "email": "e001@globex.example.com",
+          "is_manager": true
+        },
+        {
+          "employee_id": "E002",
+          "name": "Aisha Khan",
+          "entity_id": "ENG",
+          "email": "e002@globex.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E003",
+          "name": "Varun Chopra",
+          "entity_id": "ENG",
+          "email": "e003@globex.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E004",
+          "name": "Swati Agarwal",
+          "entity_id": "ENG",
+          "email": "e004@globex.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E005",
+          "name": "Harish Naidu",
+          "entity_id": "ENG",
+          "email": "e005@globex.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E006",
+          "name": "Farhan Qureshi",
+          "entity_id": "SUP",
+          "email": "e006@globex.example.com",
+          "is_manager": true
+        },
+        {
+          "employee_id": "E007",
+          "name": "Priya Nair",
+          "entity_id": "SUP",
+          "email": "e007@globex.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E008",
+          "name": "Ritu Saxena",
+          "entity_id": "SUP",
+          "email": "e008@globex.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E009",
+          "name": "Gaurav Sinha",
+          "entity_id": "SUP",
+          "email": "e009@globex.example.com",
+          "is_manager": false
+        },
+        {
+          "employee_id": "E010",
+          "name": "Tanvi Shetty",
+          "entity_id": "SUP",
+          "email": "e010@globex.example.com",
+          "is_manager": false
+        }
+      ],
+      "users": [
+        {
+          "user_id": "globex.admin",
+          "tenant_id": "globex",
+          "role": "admin",
+          "display_name": "Globex Ltd Administrator",
+          "email": "admin@globex.example.com",
+          "employee_id": null,
+          "entity_scope": [
+            "ENG",
+            "SUP"
+          ]
+        },
+        {
+          "user_id": "globex.sup.manager",
+          "tenant_id": "globex",
+          "role": "manager",
+          "display_name": "Farhan Qureshi",
+          "email": "e006@globex.example.com",
+          "employee_id": "E006",
+          "entity_scope": [
+            "SUP"
+          ]
+        },
+        {
+          "user_id": "globex.employee",
+          "tenant_id": "globex",
+          "role": "employee",
+          "display_name": "Aisha Khan",
+          "email": "e002@globex.example.com",
+          "employee_id": "E002",
+          "entity_scope": [
+            "ENG"
+          ]
+        }
+      ]
+    }
+  ]
+}

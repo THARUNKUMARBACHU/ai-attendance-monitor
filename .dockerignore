@@ -1,0 +1,34 @@
+# Build context for the Dockerfile. The Dockerfile copies only what it needs, and this file keeps
+# everything else, above all secrets, out of the context that is sent to the Docker engine.
+
+# Secrets: .env holds real cloud credentials; .env.docker holds the local stack's settings.
+# No .env file is needed in the image (the app would even read /app/.env if one were there).
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Local tooling and caches
+.git
+.claude
+.venv
+**/__pycache__
+**/*.py[cod]
+.mypy_cache
+.ruff_cache
+.pytest_cache
+*.log
+
+# Runtime data: uploads and the local model cache (the image downloads its own models)
+var/
+
+# Frontend dependencies and build output: both are recreated inside the image
+frontend/node_modules
+frontend/dist
+frontend/*.tsbuildinfo
+
+# Not needed in the image
+doc/
+docs/
+tests/
+test.py

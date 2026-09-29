@@ -1,0 +1,80 @@
+Employee ID,Employee Name,Department,Date,Status,In Time,Out Time,Total Hours,Remarks
+E001,Rahul Sharma,Engineering,2026-08-03,Present,09:15,18:24,9.15,
+E001,Rahul Sharma,Engineering,2026-08-04,Present,08:59,18:13,9.23,
+E001,Rahul Sharma,Engineering,2026-08-05,Present,09:05,18:09,9.07,
+E001,Rahul Sharma,Engineering,2026-08-06,Present,09:20,18:18,8.97,
+E001,Rahul Sharma,Engineering,2026-08-07,WFH,,,,
+E001,Rahul Sharma,Engineering,2026-08-10,Present,09:06,18:02,8.93,
+E001,Rahul Sharma,Engineering,2026-08-11,Present,08:51,18:01,9.17,
+E001,Rahul Sharma,Engineering,2026-08-12,WFH,,,,
+E001,Rahul Sharma,Engineering,2026-08-13,Present,10:12,19:05,8.88,Late - traffic
+E001,Rahul Sharma,Engineering,2026-08-17,Present,09:04,18:18,9.23,
+E001,Rahul Sharma,Engineering,2026-08-18,Present,08:56,18:23,9.45,
+E001,Rahul Sharma,Engineering,2026-08-19,Present,09:01,18:21,9.33,
+E001,Rahul Sharma,Engineering,2026-08-20,Present,08:59,18:23,9.40,
+E001,Rahul Sharma,Engineering,2026-08-21,Leave,,,,Casual leave - family function
+E001,Rahul Sharma,Engineering,2026-08-24,Present,09:57,19:14,9.28,Late - traffic
+E001,Rahul Sharma,Engineering,2026-08-25,WFH,,,,
+E001,Rahul Sharma,Engineering,2026-08-26,Present,09:06,18:01,8.92,
+E001,Rahul Sharma,Engineering,2026-08-27,Present,09:04,18:22,9.30,
+E001,Rahul Sharma,Engineering,2026-08-28,Present,08:58,17:48,8.83,
+E001,Rahul Sharma,Engineering,2026-08-31,Present,09:18,18:31,9.22,
+E002,Ananya Iyer,Engineering,2026-08-03,Present,09:54,19:11,9.28,Late - traffic
+E002,Ananya Iyer,Engineering,2026-08-04,Present,09:16,18:35,9.32,Client visit - Pune
+E002,Ananya Iyer,Engineering,2026-08-05,Present,09:36,18:28,8.87,
+E002,Ananya Iyer,Engineering,2026-08-06,Present,09:13,18:30,9.28,
+E002,Ananya Iyer,Engineering,2026-08-07,Present,09:20,18:20,9.00,
+E002,Ananya Iyer,Engineering,2026-08-10,Present,09:19,18:24,9.08,
+E002,Ananya Iyer,Engineering,2026-08-11,Present,09:51,18:45,8.90,Late - traffic
+E002,Ananya Iyer,Engineering,2026-08-12,Absent,,,,
+E002,Ananya Iyer,Engineering,2026-08-13,Present,09:20,18:33,9.22,
+E002,Ananya Iyer,Engineering,2026-08-17,Present,09:17,18:47,9.50,
+E002,Ananya Iyer,Engineering,2026-08-18,Present,09:09,18:05,8.93,
+E002,Ananya Iyer,Engineering,2026-08-19,Present,09:14,18:15,9.02,
+E002,Ananya Iyer,Engineering,2026-08-20,Present,09:11,18:21,9.17,
+E002,Ananya Iyer,Engineering,2026-08-21,Present,08:57,18:00,9.05,
+E002,Ananya Iyer,Engineering,2026-08-24,Present,10:14,19:14,9.00,Late - traffic
+E002,Ananya Iyer,Engineering,2026-08-25,Present,09:04,18:24,9.33,
+E002,Ananya Iyer,Engineering,2026-08-26,Present,09:19,18:44,9.42,
+E002,Ananya Iyer,Engineering,2026-08-27,Leave,,,,Casual leave - reachable on +91-98765-43210
+E002,Ananya Iyer,Engineering,2026-08-28,WFH,,,,WFH - approved by manager
+E002,Ananya Iyer,Engineering,2026-08-31,Present,08:55,17:48,8.88,
+E003,Vikram Reddy,Engineering,2026-08-03,WFH,,,,WFH - approved by manager
+E003,Vikram Reddy,Engineering,2026-08-04,Present,08:48,17:37,8.82,Training session
+E003,Vikram Reddy,Engineering,2026-08-05,Present,09:15,18:10,8.92,
+E003,Vikram Reddy,Engineering,2026-08-06,Present,09:29,18:18,8.82,
+E003,Vikram Reddy,Engineering,2026-08-07,Present,09:12,18:22,9.17,
+E003,Vikram Reddy,Engineering,2026-08-10,Present,09:54,18:58,9.07,Late - traffic
+E003,Vikram Reddy,Engineering,2026-08-11,Present,09:15,18:16,9.02,
+E003,Vikram Reddy,Engineering,2026-08-12,Present,09:12,18:10,8.97,
+E003,Vikram Reddy,Engineering,2026-08-13,Present,09:54,18:39,8.75,Training session
+E003,Vikram Reddy,Engineering,2026-08-17,Present,09:07,18:27,9.33,
+E003,Vikram Reddy,Engineering,2026-08-18,Leave,,,,"Sick leave - viral fever, medical certificate submitted"
+E003,Vikram Reddy,Engineering,2026-08-19,Present,09:29,18:19,8.83,
+E003,Vikram Reddy,Engineering,2026-08-21,Present,09:12,18:14,9.03,
+E003,Vikram Reddy,Engineering,2026-08-24,Half Day,09:13,13:38,4.42,Half day - bank work
+E003,Vikram Reddy,Engineering,2026-08-25,Present,10:06,19:25,9.32,Late - traffic
+E003,Vikram Reddy,Engineering,2026-08-26,Present,09:44,18:55,9.18,Late - traffic
+E003,Vikram Reddy,Engineering,2026-08-27,Present,09:11,18:11,9.00,
+E003,Vikram Reddy,Engineering,2026-08-28,Present,09:01,18:03,9.03,
+E003,Vikram Reddy,Engineering,2026-08-31,WFH,,,,
+E004,Sneha Kulkarni,Engineering,2026-08-03,Present,09:12,18:28,9.27,
+E004,Sneha Kulkarni,Engineering,2026-08-04,Present,09:11,18:20,9.15,
+E004,Sneha Kulkarni,Engineering,2026-08-05,Absent,,,,Absent - informed supervisor late
+E004,Sneha Kulkarni,Engineering,2026-08-06,WFH,,,,
+E004,Sneha Kulkarni,Engineering,2026-08-07,Present,09:32,18:45,9.22,
+E004,Sneha Kulkarni,Engineering,2026-08-10,WFH,,,,
+E004,Sneha Kulkarni,Engineering,2026-08-11,Half Day,09:14,13:25,4.18,Half day - medical appointment
+E004,Sneha Kulkarni,Engineering,2026-08-12,Present,08:48,17:35,8.78,
+E004,Sneha Kulkarni,Engineering,2026-08-13,Present,09:04,18:10,9.10,
+E004,Sneha Kulkarni,Engineering,2026-08-17,Present,09:24,18:34,9.17,
+E004,Sneha Kulkarni,Engineering,2026-08-18,Present,09:01,18:06,9.08,
+E004,Sneha Kulkarni,Engineering,2026-08-19,Present,09:03,17:51,8.80,
+E004,Sneha Kulkarni,Engineering,2026-08-20,Present,09:03,18:31,9.47,
+E004,Sneha Kulkarni,Engineering,2026-08-21,Present,09:03,18:12,9.15,
+E004,Sneha Kulkarni,Engineering,2026-08-24,Present,08:37,17:54,9.28,
+E004,Sneha Kulkarni,Engineering,2026-08-25,Present,09:08,16:38,7.50,
+E004,Sneha Kulkarni,Engineering,2026-08-26,Present,09:01,17:57,8.93,
+E004,Sneha Kulkarni,Engineering,2026-08-27,Present,09:47,19:02,9.25,
+E004,Sneha Kulkarni,Engineering,2026-08-28,Present,09:15,18:41,9.43,
+E004,Sneha Kulkarni,Engineering,2026-08-31,Present,09:05,18:22,9.28,

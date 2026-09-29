@@ -1,0 +1,137 @@
+{
+  "description": "Changed-file scenario: v2 of the Acme Engineering biometric CSV, uploaded under the same file name, differs from v1 in exactly two records.",
+  "tenant_id": "acme",
+  "source_file": "acme_engineering_biometric_2026-08.csv",
+  "v1_path": "tenants/acme/inputs/acme_engineering_biometric_2026-08.csv",
+  "v2_path": "tenants/acme/scenarios/changed_file/acme_engineering_biometric_2026-08.csv",
+  "v1_sha256": "bec674a458017ae1ee818e94d66b7dbfc13b2aa8b8c55af229d84dc2ee869b9a",
+  "v2_sha256": "07dbebbba1e16e17e11594d5ffd54d95644ddada7f337ce2c1932ee8c01fa024",
+  "record_count": 79,
+  "expected_ingestion_result": {
+    "v1_reupload_unchanged": {
+      "records_created": 0,
+      "records_updated": 0,
+      "records_deleted": 0
+    },
+    "v2_upload_after_v1": {
+      "records_created": 0,
+      "records_updated": 2,
+      "records_unchanged": 77,
+      "records_deleted": 0
+    }
+  },
+  "changes": [
+    {
+      "record_key": "8dc8660a7093330e",
+      "employee_id": "E002",
+      "employee_name": "Ananya Iyer",
+      "attendance_date": "2026-08-12",
+      "source_locator": {
+        "type": "row",
+        "row": 29
+      },
+      "source_page_or_row": "row 29",
+      "fields": {
+        "status": {
+          "before": "ABSENT",
+          "after": "PRESENT"
+        },
+        "raw_status": {
+          "before": "Absent",
+          "after": "Present"
+        },
+        "check_in": {
+          "before": null,
+          "after": "09:12"
+        },
+        "check_out": {
+          "before": null,
+          "after": "18:20"
+        },
+        "total_hours": {
+          "before": null,
+          "after": 9.13
+        },
+        "remarks": {
+          "before": null,
+          "after": "Biometric sync corrected"
+        },
+        "remarks_sensitivity": {
+          "before": null,
+          "after": "confidential"
+        }
+      }
+    },
+    {
+      "record_key": "4351f0d8362c718a",
+      "employee_id": "E004",
+      "employee_name": "Sneha Kulkarni",
+      "attendance_date": "2026-08-25",
+      "source_locator": {
+        "type": "row",
+        "row": 76
+      },
+      "source_page_or_row": "row 76",
+      "fields": {
+        "check_out": {
+          "before": "16:38",
+          "after": "18:08"
+        },
+        "total_hours": {
+          "before": 7.5,
+          "after": 9.0
+        }
+      }
+    }
+  ],
+  "still_missing": [
+    {
+      "employee_id": "E003",
+      "attendance_date": "2026-08-20",
+      "note": "still no row in v2 - remains unknown"
+    }
+  ],
+  "expected_effect": {
+    "employee_E002_attendance_pct": {
+      "before": 90.0,
+      "after": 95.0
+    },
+    "department_ENG_attendance_pct": {
+      "before": 92.41,
+      "after": 93.67
+    },
+    "tenant_acme_overall_attendance_pct": {
+      "before": 89.85,
+      "after": 90.1
+    },
+    "department_ENG_status_counts": {
+      "before": {
+        "PRESENT": 64,
+        "ABSENT": 2,
+        "LEAVE": 3,
+        "WFH": 8,
+        "HALF_DAY": 2,
+        "HOLIDAY": 0,
+        "WEEKLY_OFF": 0
+      },
+      "after": {
+        "PRESENT": 65,
+        "ABSENT": 1,
+        "LEAVE": 3,
+        "WFH": 8,
+        "HALF_DAY": 2,
+        "HOLIDAY": 0,
+        "WEEKLY_OFF": 0
+      }
+    },
+    "department_ENG_avg_total_hours": {
+      "before": 8.94,
+      "after": 8.97
+    }
+  },
+  "notes": [
+    "Re-uploading v1 unchanged (same file name, same bytes) must create zero records and change nothing.",
+    "Uploading v2 must update exactly the two records above in place (same record_key, same locator); all other records stay identical.",
+    "E003 on 2026-08-20 has no row in v1 or v2: it stays unknown and is never counted as ABSENT."
+  ]
+}
