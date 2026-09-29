@@ -59,6 +59,16 @@ This is the fastest path: the app runs directly on your machine and uses Postgre
 - Tesseract 5, only for the scanned PDF.
 - An OpenRouter API key, optional. Without it, every question gets a controlled "provider unavailable" answer.
 
+**Installing Tesseract.** It is needed only for the scanned PDF; every other format works without it.
+
+| OS | Install | Then |
+|---|---|---|
+| Windows | `winget install --exact --id UB-Mannheim.TesseractOCR`, or the installer from [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki) | The installer does not add Tesseract to the PATH. Set `TESSERACT_CMD` in `.env` to `C:\Program Files\Tesseract-OCR\tesseract.exe`, or to `%LOCALAPPDATA%\Programs\Tesseract-OCR\tesseract.exe` for a per-user install. |
+| macOS | `brew install tesseract` | Nothing; it is on the PATH. |
+| Ubuntu or Debian | `sudo apt-get install -y tesseract-ocr` | Nothing; it is on the PATH. |
+
+Check it with `tesseract --version` (on Windows: `& "C:\Program Files\Tesseract-OCR\tesseract.exe" --version`). The English language data comes with each of these. If Tesseract is missing, only the scanned PDF's job fails, with a message saying to set `TESSERACT_CMD`.
+
 ```powershell
 # 1. Configure: fill in JWT_SECRET, the database URLs, REDIS_URL, QDRANT_URL/QDRANT_API_KEY,
 #    OPENROUTER_API_KEY and TESSERACT_CMD (see "Configuration")
