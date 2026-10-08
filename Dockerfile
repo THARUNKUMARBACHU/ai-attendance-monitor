@@ -73,11 +73,15 @@ TextEmbedding(model_name=os.environ["EMBEDDING_MODEL"], cache_dir=cache_dir)
 SparseTextEmbedding(model_name=os.environ["SPARSE_MODEL"], cache_dir=cache_dir)
 TextCrossEncoder(model_name=os.environ["RERANK_MODEL"], cache_dir=cache_dir)
 
-# fastembed takes a model from the cache only if the model's file is there, and BM25 has none: it
-# names the placeholder "mock.file". Without an empty one, BM25 would need the Hugging Face API on
-# every start.
+# fastembed takes a model from the cache only if the model's file and every additional file are there.
+# BM25 has no model file (it names the placeholder "mock.file"), and fastembed 0.8.1 also expects a
+# stopword list (tamil.txt) that the model repository does not contain. Without empty placeholders,
+# BM25 would need the Hugging Face API on every start. Only the English stopwords are used.
+from fastembed.sparse.bm25 import supported_languages
+
 for snapshot in Path(cache_dir).glob("models--Qdrant--bm25/snapshots/*"):
-    (snapshot / "mock.file").touch()
+    for name in ["mock.file", *(f"{language}.txt" for language in supported_languages)]:
+        (snapshot / name).touch(exist_ok=True)
 PY
 
 # The built UI, which the API serves at /ui/ from /app/frontend/dist.

@@ -36,3 +36,12 @@ def test_llm_api_key_follows_provider() -> None:
     assert settings.llm_api_key is not None
     assert settings.llm_api_key.get_secret_value() == "sk-test"
     assert isinstance(Settings.model_fields["seed_file"].default.name, str)
+
+
+def test_rejects_a_short_demo_access_code() -> None:
+    with pytest.raises(ValidationError, match="DEMO_ACCESS_CODE"):
+        make_settings(demo_access_code="short")
+
+
+def test_uploads_go_through_the_worker_queue_by_default() -> None:
+    assert make_settings().ingestion_mode == "queue"

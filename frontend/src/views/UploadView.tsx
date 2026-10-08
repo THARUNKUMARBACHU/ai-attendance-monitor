@@ -106,6 +106,8 @@ function useJobs(active: boolean) {
   return { items, loaded, updatedAt, polling, refresh, upsert };
 }
 
+const SLOW_UPLOAD_MS = 8_000;
+
 export function UploadView({ me, active }: { me: Me; active: boolean }) {
   const { clearError, announce } = useFeedback();
   const uid = useId();
@@ -117,6 +119,9 @@ export function UploadView({ me, active }: { me: Me; active: boolean }) {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [entityId, setEntityId] = useState('');
   const [uploading, setUploading] = useState(false);
+  // Set when the current upload has taken a while: on a host without a background worker the request
+  // also processes the file, and a scanned PDF takes about a minute.
+  const [slow, setSlow] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const jobs = useJobs(active);
@@ -165,6 +170,8 @@ export function UploadView({ me, active }: { me: Me; active: boolean }) {
     let failed = 0;
     for (const item of items) {
       patch(item.id, { status: 'uploading', error: undefined });
+      setSlow(false);
+      const slowTimer = window.setTimeout(() => setSlow(true), SLOW_UPLOAD_MS);
       try {
         const result = await api.upload(item.file, entity);
         patch(item.id, { status: 'accepted', result });
@@ -177,6 +184,9 @@ export function UploadView({ me, active }: { me: Me; active: boolean }) {
         }
         patch(item.id, { status: 'failed', error: describeError(error) ?? undefined });
         failed += 1;
+      } finally {
+        window.clearTimeout(slowTimer);
+        setSlow(false);
       }
     }
     setUploading(false);
@@ -234,7 +244,7 @@ export function UploadView({ me, active }: { me: Me; active: boolean }) {
       case 'uploading':
         return (
           <span className="state-line">
-            <Spinner /> Uploading…
+            <Spinner /> {slow ? 'Still working. A scanned PDF takes about a minute.' : 'Uploading…'}
           </span>
         );
       case 'failed':

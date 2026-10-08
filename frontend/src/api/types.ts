@@ -36,10 +36,13 @@ export interface DevUser {
 
 export interface DevUsersResponse {
   users: DevUser[];
+  /** True when the deployment asks for a demo access code at sign-in. */
+  access_code_required?: boolean;
 }
 
 export interface DevTokenRequest {
   user_id: string;
+  access_code?: string;
 }
 
 export interface TokenResponse {

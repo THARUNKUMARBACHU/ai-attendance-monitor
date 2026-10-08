@@ -44,6 +44,18 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/attendance_ai"]
 
+# The Vercel deployment (see "Hosted demo on Vercel" in README.md). Not used locally or in Docker.
+[tool.vercel]
+entrypoint = "app:app"
+
+[tool.vercel.scripts]
+build = "python scripts/vercel_build.py"
+
+[tool.vercel.fastapi.static]
+# Serve /ui from the CDN even though the app has HTTP middleware; vercel.json sets the UI's security
+# headers instead.
+cdn = true
+
 [tool.ruff]
 line-length = 110
 target-version = "py312"

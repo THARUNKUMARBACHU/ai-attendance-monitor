@@ -1,27 +1,31 @@
 """Ingestion end to end with the real sample files: upload -> queue -> pipeline -> PostgreSQL + vector
-store, checked against the ground truth. The queue runs jobs inline; the vector store is Qdrant's
-in-process mode with a deterministic embedder, so no network or model download is needed."""
+store, checked against the ground truth. Jobs run through the inline queue (INGESTION_MODE=inline), so
+each upload is processed before submit returns; the vector store is Qdrant's in-process mode with a
+deterministic embedder, so no network or model download is needed."""
 
 import json
 import shutil
+import uuid
 from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
 from qdrant_client import QdrantClient
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from attendance_ai.core.access import AccessContext
 from attendance_ai.core.directory import Directory
 from attendance_ai.governance.audit import AuditLog
 from attendance_ai.ingestion.indexing import DocumentIndexer
+from attendance_ai.ingestion.inline import InlineJobQueue
 from attendance_ai.ingestion.pipeline import IngestionPipeline
-from attendance_ai.ingestion.queue import JobMessage
-from attendance_ai.ingestion.service import IngestionService
+from attendance_ai.ingestion.queue import JobMessage, JobQueue
+from attendance_ai.ingestion.service import INTERRUPTED_MESSAGE, IngestionService
 from attendance_ai.stores.db import Database
 from attendance_ai.stores.file_store import FileStore
-from attendance_ai.stores.models import AttendanceRecord
+from attendance_ai.stores.models import AttendanceRecord, IngestionJob
 from attendance_ai.stores.vector_store import VectorStore
 
 from ..fakes import FakeEmbedder
@@ -32,39 +36,44 @@ TESSERACT = find_tesseract()
 Ctx = Callable[[str], AccessContext]
 
 
-class InlineQueue:
-    """Runs each job as soon as it is queued, like a worker with no delay."""
-
-    def __init__(self) -> None:
-        self.pipeline: IngestionPipeline | None = None
-
-    def enqueue(self, message: JobMessage) -> None:
-        assert self.pipeline is not None
-        self.pipeline.run(message.job_id, message.tenant_id, message.product_id, message.module)
-
-
-@pytest.fixture
-def ingest(database: Database, directory: Directory, tmp_path: Path) -> Callable[..., dict[str, Any]]:
-    settings = make_settings(tesseract_cmd=TESSERACT)
-    store = VectorStore(QdrantClient(location=":memory:"), "chunks", FakeEmbedder.dense_size)
-    files = FileStore(tmp_path)
-    queue = InlineQueue()
-    queue.pipeline = IngestionPipeline(
-        settings=settings,
+def _inline_queue(database: Database, directory: Directory, files: FileStore) -> InlineJobQueue:
+    pipeline = IngestionPipeline(
+        settings=make_settings(tesseract_cmd=TESSERACT),
         directory=directory,
         database=database,
         file_store=files,
-        indexer=DocumentIndexer(store, FakeEmbedder()),  # type: ignore[arg-type]
+        indexer=DocumentIndexer(
+            VectorStore(QdrantClient(location=":memory:"), "chunks", FakeEmbedder.dense_size),
+            FakeEmbedder(),  # type: ignore[arg-type]
+        ),
         audit=AuditLog(database),
     )
-    service = IngestionService(
+    return InlineJobQueue(pipeline.run, pause_seconds=0)
+
+
+def _service(
+    database: Database,
+    directory: Directory,
+    files: FileStore,
+    queue: JobQueue,
+    *,
+    interrupted_after: timedelta | None = timedelta(minutes=10),
+) -> IngestionService:
+    return IngestionService(
         database=database,
         directory=directory,
         file_store=files,
         queue=queue,
         audit=AuditLog(database),
         max_upload_bytes=20 * 1024 * 1024,
+        interrupted_after=interrupted_after,
     )
+
+
+@pytest.fixture
+def ingest(database: Database, directory: Directory, tmp_path: Path) -> Callable[..., dict[str, Any]]:
+    files = FileStore(tmp_path)
+    service = _service(database, directory, files, _inline_queue(database, directory, files))
 
     def _ingest(
         ctx: AccessContext, path: Path, *, name: str | None = None, entity: str | None = None
@@ -160,12 +169,13 @@ def test_scanned_register_flags_uncertain_cells_instead_of_guessing(
         assert (record.check_in.strftime("%H:%M") if record.check_in else None) == truth["check_in"], key
 
 
-def _moved_to_2031(path: Path, tmp_path: Path) -> Path:
-    """The same file with its August 2026 dates moved to August 2031. The content is otherwise identical,
-    but its records (one per employee and day) collide with no other test's records: another file that
-    already holds an employee's day would, rightly, make these rows fail."""
-    target = tmp_path / f"{path.parent.name}_{path.name}"
-    target.write_bytes(path.read_bytes().replace(b"2026-08-", b"2031-08-"))
+def _moved_to(year: int, path: Path, tmp_path: Path) -> Path:
+    """The same file with its August 2026 dates moved to August of another year. The content is otherwise
+    identical, but its records (one per employee and day) collide with no other test's records: another
+    file that already holds an employee's day would, rightly, make these rows fail. Each test that uses
+    this picks its own year."""
+    target = tmp_path / f"{year}_{path.parent.name}_{path.name}"
+    target.write_bytes(path.read_bytes().replace(b"2026-08-", f"{year}-08-".encode()))
     return target
 
 
@@ -174,8 +184,8 @@ def test_reupload_is_idempotent_and_a_changed_version_updates_only_what_changed(
 ) -> None:
     ctx = system_ctx("acme")
     inputs, scenarios = SAMPLES / "acme" / "inputs", SAMPLES / "acme" / "scenarios" / "changed_file"
-    original = _moved_to_2031(inputs / "acme_engineering_biometric_2026-08.csv", tmp_path)
-    changed = _moved_to_2031(scenarios / "acme_engineering_biometric_2026-08.csv", tmp_path)
+    original = _moved_to(2031, inputs / "acme_engineering_biometric_2026-08.csv", tmp_path)
+    changed = _moved_to(2031, scenarios / "acme_engineering_biometric_2026-08.csv", tmp_path)
     name = "idempotency_check.csv"  # one logical file, uploaded three times
     first = ingest(ctx, original, name=name)
     if first["receipt"].status == "duplicate":
@@ -211,3 +221,85 @@ def test_injected_instructions_are_quarantined(
     counts = outcome["job"]["counts"]
     assert counts["records_created"] == 0
     assert counts["chunks_quarantined"] >= 1
+
+
+ENGINEERING_CSV = SAMPLES / "acme" / "inputs" / "acme_engineering_biometric_2026-08.csv"
+
+
+class ForgetfulFileStore(FileStore):
+    """Loses the first stored file before it is processed, as a host without a persistent disk can."""
+
+    def __init__(self, root: Path) -> None:
+        super().__init__(root)
+        self.lost = False
+
+    def path_for(self, tenant_id: str, stored_path: str) -> Path:
+        if not self.lost:
+            self.lost = True
+            raise FileNotFoundError("the stored upload is gone")
+        return super().path_for(tenant_id, stored_path)
+
+
+class DroppedQueue:
+    """Accepts jobs and never runs them, like a request stopped before it could process its upload."""
+
+    def enqueue(self, message: JobMessage) -> None:
+        return None
+
+
+def test_a_failed_upload_is_processed_again_when_uploaded_again(
+    database: Database, directory: Directory, system_ctx: Ctx, tmp_path: Path
+) -> None:
+    ctx = system_ctx("acme")
+    files = ForgetfulFileStore(tmp_path / "store")
+    service = _service(database, directory, files, _inline_queue(database, directory, files))
+    data = _moved_to(2032, ENGINEERING_CSV, tmp_path).read_bytes()
+
+    first = service.submit(ctx, filename="retry_check.csv", data=data, entity_id=None)
+    assert service.get_job(ctx, first.job_id)["status"] == "failed"
+
+    again = service.submit(ctx, filename="retry_check.csv", data=data, entity_id=None)
+    assert again.status == "queued"
+    assert again.job_id != first.job_id
+    assert again.version_no == first.version_no == 1
+    job = service.get_job(ctx, again.job_id)
+    assert job["status"] == "completed", job
+    assert job["counts"]["records_created"] == 79
+
+    # Once it has been processed, the same file is a duplicate again.
+    third = service.submit(ctx, filename="retry_check.csv", data=data, entity_id=None)
+    assert third.status == "duplicate"
+    assert third.duplicate_of_job_id == first.job_id
+
+
+def test_a_job_cut_short_is_shown_as_failed_and_can_be_retried(
+    database: Database, directory: Directory, system_ctx: Ctx, tmp_path: Path
+) -> None:
+    ctx = system_ctx("acme")
+    files = FileStore(tmp_path / "store")
+    data = _moved_to(2033, ENGINEERING_CSV, tmp_path).read_bytes()
+    lost = _service(database, directory, files, DroppedQueue()).submit(
+        ctx, filename="interrupted_check.csv", data=data, entity_id=None
+    )
+    inline = _service(database, directory, files, _inline_queue(database, directory, files))
+    assert inline.get_job(ctx, lost.job_id)["status"] == "queued"  # recent: it may still be running
+
+    with database.session_for(ctx) as session:
+        session.execute(
+            update(IngestionJob)
+            .where(IngestionJob.id == uuid.UUID(lost.job_id))
+            .values(updated_at=datetime.now(UTC) - timedelta(minutes=30))
+        )
+    # With a worker (queue mode), the worker's sweep owns stalled jobs, so the API leaves them alone.
+    worker_mode = _service(database, directory, files, DroppedQueue(), interrupted_after=None)
+    assert worker_mode.get_job(ctx, lost.job_id)["status"] == "queued"
+
+    listed = {job["job_id"]: job for job in inline.list_jobs(ctx, limit=100)}
+    assert listed[lost.job_id]["status"] == "failed"
+    assert inline.get_job(ctx, lost.job_id)["last_error"] == INTERRUPTED_MESSAGE
+
+    retried = inline.submit(ctx, filename="interrupted_check.csv", data=data, entity_id=None)
+    assert retried.status == "queued"
+    job = inline.get_job(ctx, retried.job_id)
+    assert job["status"] == "completed", job
+    assert job["counts"]["records_created"] == 79

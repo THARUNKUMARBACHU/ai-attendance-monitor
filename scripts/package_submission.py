@@ -44,6 +44,8 @@ EXCLUDED_DIRS = {
     "var",
     "dist",
     "build",
+    "vendor",
+    ".vercel",
 }
 EXCLUDED_TOP_LEVEL = {"doc", "test.py"}  # the confidential brief and a personal scratch file
 EXCLUDED_NAMES = {".DS_Store", "Thumbs.db"}

@@ -37,3 +37,7 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Vercel: build output of scripts/vercel_build.py, and the CLI's local project link
+vendor/
+.vercel/

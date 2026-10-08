@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     storage_dir: Path = PROJECT_ROOT / "var" / "storage"
     upload_max_mb: int = Field(default=20, ge=1, le=200)
     tesseract_cmd: str | None = None
+    # "queue": the worker processes each upload from the Redis queue. "inline": the upload request
+    # processes it, for hosts without a background worker (the Vercel deployment).
+    ingestion_mode: Literal["queue", "inline"] = "queue"
 
     # Qdrant (vector store) and the local embedding models (FastEmbed).
     qdrant_url: str | None = None
@@ -85,6 +88,9 @@ class Settings(BaseSettings):
     jwt_audience: str = "attendance-ai-api"
     jwt_ttl_minutes: int = Field(default=60, ge=5, le=24 * 60)
     auth_dev_login_enabled: bool = False
+    # When set, the development sign-in also asks for this code, so a public demo deployment can be
+    # shared with the people who have the code and nobody else.
+    demo_access_code: SecretStr | None = None
 
     seed_file: Path = PROJECT_ROOT / "sample_data" / "seed" / "tenants.json"
     health_check_timeout_seconds: float = Field(default=2.0, gt=0, le=10)
@@ -95,6 +101,10 @@ class Settings(BaseSettings):
             raise ValueError("JWT_SECRET must be set to at least 32 characters.")
         if self.app_env == "prod" and self.auth_dev_login_enabled:
             raise ValueError("AUTH_DEV_LOGIN_ENABLED must be false when APP_ENV=prod.")
+        code = self.demo_access_code.get_secret_value() if self.demo_access_code else ""
+        if code and len(code) < 8:
+            # Sign-in attempts are not rate limited, so a short code could be guessed.
+            raise ValueError("DEMO_ACCESS_CODE must be at least 8 characters.")
         return self
 
     @property

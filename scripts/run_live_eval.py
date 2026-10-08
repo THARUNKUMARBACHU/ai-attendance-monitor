@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -83,6 +84,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Live evaluation of the demo questions.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--only", help="comma-separated question IDs")
+    parser.add_argument(
+        "--access-code",
+        default=os.environ.get("DEMO_ACCESS_CODE"),
+        help="the demo sign-in code, when the deployment sets one (default: $DEMO_ACCESS_CODE)",
+    )
     args = parser.parse_args()
     items = json.loads(EXPECTED.read_text(encoding="utf-8"))
     if args.only:
@@ -95,7 +101,8 @@ def main() -> int:
         for item in items:
             user = item["user_id"]
             if user not in tokens:
-                login = client.post("/api/v1/auth/dev-token", json={"user_id": user})
+                body = {"user_id": user} | ({"access_code": args.access_code} if args.access_code else {})
+                login = client.post("/api/v1/auth/dev-token", json=body)
                 login.raise_for_status()
                 tokens[user] = login.json()["access_token"]
             response = client.post(
