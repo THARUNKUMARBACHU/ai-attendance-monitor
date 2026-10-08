@@ -85,10 +85,23 @@ def fetch_models() -> None:
     for snapshot in MODEL_DIR.glob(f"models--{sparse.replace('/', '--')}/snapshots/*"):
         for name in ["mock.file", *(f"{language}.txt" for language in supported_languages)]:
             (snapshot / name).touch(exist_ok=True)
+    inline_cache_links(MODEL_DIR)
 
     env = {**os.environ, "HF_HUB_OFFLINE": "1", "PYTHONPATH": str(ROOT / "src")}
     script = OFFLINE_CHECK.format(dense=dense, sparse=sparse, rerank=rerank, cache=cache)
     subprocess.run([sys.executable, "-c", script], env=env, check=True)  # noqa: S603 (our own script)
+
+
+def inline_cache_links(cache: Path) -> None:
+    """The Hugging Face cache keeps each file once under blobs/ and links to it from snapshots/. The
+    function bundle follows the links, so every model would ship two or three times. Replace each link
+    with the file itself and drop blobs/: a snapshot that holds real files loads the same way."""
+    for link in [path for path in cache.rglob("*") if path.is_symlink()]:
+        target = link.resolve()
+        link.unlink()
+        shutil.copy2(target, link)
+    for folder in [*cache.glob("models--*/blobs"), *cache.glob(".locks")]:
+        shutil.rmtree(folder)
 
 
 def fetch_tesseract() -> None:
@@ -106,7 +119,9 @@ def fetch_tesseract() -> None:
 
 
 def size_mb(path: Path) -> float:
-    return sum(item.stat().st_size for item in path.rglob("*") if item.is_file()) / 1_048_576
+    """Real files only: a link would otherwise count its target a second time."""
+    files = (item for item in path.rglob("*") if item.is_file() and not item.is_symlink())
+    return sum(item.stat().st_size for item in files) / 1_048_576
 
 
 def main() -> int:
@@ -121,10 +136,15 @@ def main() -> int:
         fetch_models()
     if not args.skip_tesseract:
         fetch_tesseract()
-    outputs = (("UI", ROOT / "frontend" / "dist"), ("models", MODEL_DIR), ("tesseract", TESSERACT_DIR))
+    outputs = (
+        ("UI", ROOT / "frontend" / "dist"),
+        ("models", MODEL_DIR),
+        ("tesseract", TESSERACT_DIR),
+        ("python packages", Path(sys.prefix)),
+    )
     for label, path in outputs:
         if path.exists():
-            print(f"{label}: {size_mb(path):.1f} MB in {path.relative_to(ROOT)}")
+            print(f"{label}: {size_mb(path):.1f} MB in {path}")
     return 0
 
 
