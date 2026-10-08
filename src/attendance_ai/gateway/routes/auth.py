@@ -1,8 +1,11 @@
 """Identity endpoints: who am I, and (development only) a login for the seeded demo users."""
 
+import hmac
+
 from fastapi import APIRouter, Request
 
 from attendance_ai.core.access import Scope
+from attendance_ai.core.config import Settings
 from attendance_ai.core.directory import Directory, User
 from attendance_ai.core.errors import AuthenticationError, PermissionDeniedError
 from attendance_ai.gateway.auth import issue_token
@@ -66,7 +69,7 @@ def dev_users(request: Request) -> DevUsersResponse:
                     scope_description=_describe_scope(directory, user),
                 )
             )
-    return DevUsersResponse(users=users)
+    return DevUsersResponse(users=users, access_code_required=_access_code(get_settings(request)) is not None)
 
 
 @dev_router.post("/dev-token", response_model=TokenResponse)
@@ -74,6 +77,18 @@ def dev_token(body: DevTokenRequest, request: Request) -> TokenResponse:
     """Issue a token for a seeded demo user. Stands in for an identity provider in development."""
     settings = get_settings(request)
     directory = get_directory(request)
+    expected = _access_code(settings)
+    if expected is not None and not hmac.compare_digest((body.access_code or "").encode(), expected.encode()):
+        get_audit(request).record(
+            AuditEvent(
+                "auth",
+                "dev_token_denied",
+                "denied",
+                details={"user_id": body.user_id, "reason": "access_code"},
+            ),
+            request_id=request.state.request_id,
+        )
+        raise AuthenticationError("The access code is missing or incorrect.")
     user = directory.find_user(body.user_id)
     if user is None:
         get_audit(request).record(
@@ -93,6 +108,14 @@ def dev_token(body: DevTokenRequest, request: Request) -> TokenResponse:
     )
     get_audit(request).record(AuditEvent("auth", "dev_token_issued", "success"), ctx)
     return TokenResponse(access_token=token, expires_in=expires_in)
+
+
+def _access_code(settings: Settings) -> str | None:
+    """The demo access code, or None when the deployment does not ask for one."""
+    code = settings.demo_access_code
+    if code is None or not code.get_secret_value():
+        return None
+    return code.get_secret_value()
 
 
 def _scope_of(directory: Directory, user: User) -> Scope:

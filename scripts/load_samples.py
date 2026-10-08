@@ -4,12 +4,15 @@ Usage:
     uv run python scripts/load_samples.py                     # the 7 input files + the prompt-injection memo
     uv run python scripts/load_samples.py --changed-file      # then re-upload v1 (duplicate) and upload v2
 
-Needs the API (with AUTH_DEV_LOGIN_ENABLED=true) and the worker running.
+Needs the API (with AUTH_DEV_LOGIN_ENABLED=true) and the worker running. Against the hosted demo, pass
+--base-url, the access code (--access-code, or DEMO_ACCESS_CODE in the environment) and a longer
+--timeout: there each upload is processed inside its request, about a minute for the scanned PDF.
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from pathlib import Path
@@ -36,8 +39,9 @@ CHANGED_FILE: list[tuple[str, str, str | None]] = [
 ]
 
 
-def login(client: httpx.Client, user_id: str) -> dict[str, str]:
-    response = client.post("/api/v1/auth/dev-token", json={"user_id": user_id})
+def login(client: httpx.Client, user_id: str, access_code: str | None) -> dict[str, str]:
+    body = {"user_id": user_id} | ({"access_code": access_code} if access_code else {})
+    response = client.post("/api/v1/auth/dev-token", json=body)
     response.raise_for_status()
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
@@ -62,12 +66,16 @@ def wait(client: httpx.Client, headers: dict[str, str], job_id: str, timeout: fl
         time.sleep(2)
 
 
-def run(base_url: str, plan: list[tuple[str, str, str | None]]) -> bool:
+def run(
+    base_url: str, plan: list[tuple[str, str, str | None]], *, access_code: str | None, timeout: float
+) -> bool:
     ok = True
-    with httpx.Client(base_url=base_url, timeout=120) as client:
+    with httpx.Client(base_url=base_url, timeout=timeout) as client:
         tokens: dict[str, dict[str, str]] = {}
         for user_id, relative, entity in plan:
-            headers = tokens.setdefault(user_id, login(client, user_id))
+            if user_id not in tokens:
+                tokens[user_id] = login(client, user_id, access_code)
+            headers = tokens[user_id]
             path = SAMPLES / relative
             receipt = upload(client, headers, path, entity)
             if "job_id" not in receipt:
@@ -101,10 +109,18 @@ def main() -> int:
     parser.add_argument(
         "--changed-file", action="store_true", help="re-upload v1, then upload the changed v2"
     )
+    parser.add_argument(
+        "--access-code",
+        default=os.environ.get("DEMO_ACCESS_CODE"),
+        help="the demo sign-in code, when the deployment sets one (default: $DEMO_ACCESS_CODE)",
+    )
+    parser.add_argument(
+        "--timeout", type=float, default=120, help="seconds per request (use 300 for the hosted demo)"
+    )
     args = parser.parse_args()
     plan = CHANGED_FILE if args.changed_file else INPUTS
     print(f"Uploading {len(plan)} files to {args.base_url}")
-    return 0 if run(args.base_url, plan) else 1
+    return 0 if run(args.base_url, plan, access_code=args.access_code, timeout=args.timeout) else 1
 
 
 if __name__ == "__main__":

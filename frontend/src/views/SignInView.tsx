@@ -8,7 +8,7 @@ import { useFeedback } from '../lib/feedback';
 
 type LoadState =
   | { status: 'loading' }
-  | { status: 'ready'; users: DevUser[] }
+  | { status: 'ready'; users: DevUser[]; accessCodeRequired: boolean }
   | { status: 'disabled' }
   | { status: 'failed' };
 
@@ -43,14 +43,21 @@ export function SignInView({
   const uid = useId();
   const [state, setState] = useState<LoadState>({ status: 'loading' });
   const [pendingUser, setPendingUser] = useState<string | null>(null);
+  const [accessCode, setAccessCode] = useState('');
   const groups = useMemo(() => (state.status === 'ready' ? groupByTenant(state.users) : []), [state]);
+  const codeRequired = state.status === 'ready' && state.accessCodeRequired;
+  const codeMissing = codeRequired && accessCode.trim() === '';
 
   const load = useCallback(
     async (signal?: AbortSignal) => {
       setState({ status: 'loading' });
       try {
         const data = await api.devUsers(signal);
-        setState({ status: 'ready', users: Array.isArray(data.users) ? data.users : [] });
+        setState({
+          status: 'ready',
+          users: Array.isArray(data.users) ? data.users : [],
+          accessCodeRequired: data.access_code_required === true,
+        });
       } catch (error) {
         if (error instanceof ApiError && error.status === 404) {
           setState({ status: 'disabled' });
@@ -75,7 +82,7 @@ export function SignInView({
     clearError();
     announce(`Signing in as ${user.display_name}…`);
     try {
-      const token = await api.devToken(user.user_id);
+      const token = await api.devToken(user.user_id, codeRequired ? accessCode.trim() : undefined);
       if (typeof token.access_token !== 'string' || token.access_token === '') {
         throw new Error('The server did not return an access token.');
       }
@@ -103,7 +110,27 @@ export function SignInView({
         <p className="card signin-idp">Sign-in is provided by your organisation's identity provider.</p>
       ) : (
         <>
-          <p className="signin-note">Development sign-in: pick a demo user. No passwords in this build.</p>
+          <p className="signin-note">
+            {codeRequired
+              ? 'Development sign-in: enter the access code from your invitation, then pick a demo user.'
+              : 'Development sign-in: pick a demo user. No passwords in this build.'}
+          </p>
+          {codeRequired && (
+            <div className="field signin-code">
+              <label htmlFor={`${uid}-code`} className="field-label">
+                Access code
+              </label>
+              <input
+                id={`${uid}-code`}
+                className="input"
+                type="password"
+                autoComplete="off"
+                spellCheck={false}
+                value={accessCode}
+                onChange={(event) => setAccessCode(event.target.value)}
+              />
+            </div>
+          )}
           <div aria-busy={state.status === 'loading'}>
             {state.status === 'loading' && (
               <div className="user-grid">
@@ -134,7 +161,7 @@ export function SignInView({
                       <button
                         type="button"
                         className="user-card"
-                        disabled={pendingUser !== null}
+                        disabled={pendingUser !== null || codeMissing}
                         onClick={() => void signIn(user)}
                       >
                         <span className="user-card-top">

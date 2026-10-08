@@ -9,6 +9,7 @@ import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from datetime import timedelta
 from typing import Any
 
 from fastapi import FastAPI, Request, Response
@@ -27,6 +28,9 @@ from attendance_ai.gateway.routes import auth, exports, feedback, health, ingest
 from attendance_ai.generation.openai_compatible import OpenAICompatibleProvider
 from attendance_ai.generation.router import CircuitBreaker, LLMRouter
 from attendance_ai.governance.audit import AuditLog, AuditSink
+from attendance_ai.ingestion.indexing import DocumentIndexer
+from attendance_ai.ingestion.inline import InlineJobQueue
+from attendance_ai.ingestion.pipeline import IngestionPipeline
 from attendance_ai.ingestion.queue import DramatiqJobQueue, JobQueue
 from attendance_ai.ingestion.service import IngestionService
 from attendance_ai.orchestration.answer import AnswerService
@@ -48,6 +52,9 @@ _UI_CSP = (
     "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
     "connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 )
+# Inline mode: a job still queued or running after this long lost its request (the host stops a request
+# after a few minutes), so it is shown as failed and can be retried by uploading the file again.
+INLINE_INTERRUPTED_AFTER = timedelta(minutes=10)
 
 
 def build_router(settings: Settings, redis_client: Any) -> LLMRouter | None:
@@ -68,11 +75,40 @@ def build_router(settings: Settings, redis_client: Any) -> LLMRouter | None:
     return LLMRouter(providers, CircuitBreaker(redis_client))
 
 
+def build_inline_queue(
+    settings: Settings,
+    *,
+    directory: Directory,
+    database: Database,
+    file_store: FileStore,
+    audit: AuditSink,
+    embedder: Embedder | None,
+) -> InlineJobQueue:
+    """The pipeline the worker would run, run instead inside the upload request (INGESTION_MODE=inline)."""
+    indexer = None
+    if embedder is not None:
+        indexer = DocumentIndexer(VectorStore.from_settings(settings, embedder.dense_size), embedder)
+    pipeline = IngestionPipeline(
+        settings=settings,
+        directory=directory,
+        database=database,
+        file_store=file_store,
+        indexer=indexer,
+        audit=audit,
+    )
+    return InlineJobQueue(pipeline.run)
+
+
 def build_answer_service(
-    settings: Settings, *, directory: Directory, database: Database, redis_client: Any, audit: AuditSink
+    settings: Settings,
+    *,
+    directory: Directory,
+    database: Database,
+    redis_client: Any,
+    audit: AuditSink,
+    embedder: Embedder | None,
 ) -> AnswerService:
     documents = None
-    embedder = Embedder.from_settings(settings) if settings.qdrant_url else None
     if embedder is not None:
         documents = DocumentSearch(
             VectorStore.from_settings(settings, embedder.dense_size),
@@ -114,9 +150,29 @@ def create_app(
     database = database or Database(settings)
     redis_client = redis_client or create_redis(settings)
     audit = audit or AuditLog(database)
-    queue = queue or DramatiqJobQueue(create_broker(settings))
+    file_store = FileStore(settings.storage_dir)
+    inline = settings.ingestion_mode == "inline"
+    # One set of embedding models (loaded on first use) serves both search and, in inline mode, indexing.
+    embedder = Embedder.from_settings(settings) if settings.qdrant_url else None
+    if queue is None:
+        if inline:
+            queue = build_inline_queue(
+                settings,
+                directory=directory,
+                database=database,
+                file_store=file_store,
+                audit=audit,
+                embedder=embedder,
+            )
+        else:
+            queue = DramatiqJobQueue(create_broker(settings))
     answers = answers or build_answer_service(
-        settings, directory=directory, database=database, redis_client=redis_client, audit=audit
+        settings,
+        directory=directory,
+        database=database,
+        redis_client=redis_client,
+        audit=audit,
+        embedder=embedder,
     )
 
     @asynccontextmanager
@@ -143,10 +199,11 @@ def create_app(
     app.state.ingestion = IngestionService(
         database=database,
         directory=directory,
-        file_store=FileStore(settings.storage_dir),
+        file_store=file_store,
         queue=queue,
         audit=audit,
         max_upload_bytes=settings.upload_max_mb * 1024 * 1024,
+        interrupted_after=INLINE_INTERRUPTED_AFTER if inline else None,
     )
     app.state.exports = ExportService(
         database=database, directory=directory, audit=audit, row_cap=settings.export_row_cap

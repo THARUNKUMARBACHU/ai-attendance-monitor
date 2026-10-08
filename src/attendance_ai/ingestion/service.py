@@ -1,13 +1,15 @@
 """The API side of ingestion: check an upload, detect duplicates and new versions, store the original,
-create the job and queue it. Processing happens in the worker (ingestion/pipeline.py)."""
+create the job and queue it. Processing happens in the worker (ingestion/pipeline.py), or in the upload
+request itself in inline mode (ingestion/inline.py)."""
 
 from __future__ import annotations
 
 import hashlib
 import logging
 import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from psycopg.errors import UniqueViolation
@@ -27,6 +29,7 @@ from attendance_ai.stores.models import IngestionJob, Source, SourceVersion
 logger = logging.getLogger(__name__)
 
 STAGES = ("validate", "extract", "normalise", "store", "index")
+INTERRUPTED_MESSAGE = "Processing was interrupted before it finished. Upload the file again to retry."
 
 
 class UploadConflictError(AppError):
@@ -72,13 +75,17 @@ class IngestionService:
         queue: JobQueue,
         audit: AuditSink,
         max_upload_bytes: int,
+        interrupted_after: timedelta | None = None,
     ) -> None:
+        """`interrupted_after` is for inline mode, where no worker sweeps up stalled jobs: a job still
+        queued or running after that long was cut short with its request, and is shown as failed."""
         self._db = database
         self._directory = directory
         self._files = file_store
         self._queue = queue
         self._audit = audit
         self._max_bytes = max_upload_bytes
+        self._interrupted_after = interrupted_after
 
     def submit(self, ctx: AccessContext, *, filename: str, data: bytes, entity_id: str | None) -> Receipt:
         ctx.require("ingest")
@@ -131,6 +138,8 @@ class IngestionService:
             duplicate = session.scalars(
                 select(SourceVersion).where(SourceVersion.checksum == checksum)
             ).first()
+            if duplicate is not None and duplicate.status == "failed":
+                return self._retry_failed(session, ctx, duplicate, data, checksum, extension, entity_id)
             if duplicate is not None:
                 original = session.scalars(
                     select(IngestionJob)
@@ -225,6 +234,48 @@ class IngestionService:
             message = JobMessage(str(job.id), ctx.tenant_id, ctx.product_id, ctx.module)
             return receipt, message
 
+    def _retry_failed(
+        self,
+        session: Any,
+        ctx: AccessContext,
+        version: SourceVersion,
+        data: bytes,
+        checksum: str,
+        extension: str,
+        entity_id: str | None,
+    ) -> tuple[Receipt, JobMessage]:
+        """The same file was uploaded before and its processing failed: process that version again with a
+        new job. The file is stored again, because hosts without a persistent disk may have lost it."""
+        version.storage_path = self._files.save(ctx.tenant_id, f"{version.id}{extension}", data)
+        version.status = "received"
+        source = session.get(Source, version.source_id)
+        if source is not None and entity_id and source.entity_id != entity_id:
+            source.entity_id = entity_id
+        job = IngestionJob(
+            tenant_id=ctx.tenant_id,
+            product_id=ctx.product_id,
+            module=ctx.module,
+            source_version_id=version.id,
+            requested_by=ctx.user_id,
+            status="queued",
+            max_attempts=MAX_ATTEMPTS,
+            stages=initial_stages(f"retry after a failed attempt; {version.media_type}, {len(data)} bytes"),
+        )
+        session.add(job)
+        session.flush()
+        receipt = Receipt(
+            job_id=str(job.id),
+            status="queued",
+            filename=version.original_filename,
+            source_id=str(version.source_id),
+            version_no=version.version_no,
+            checksum=checksum,
+            media_type=version.media_type,
+            size_bytes=version.size_bytes,
+            duplicate_of_job_id=None,
+        )
+        return receipt, JobMessage(str(job.id), ctx.tenant_id, ctx.product_id, ctx.module)
+
     def list_jobs(self, ctx: AccessContext, *, limit: int) -> list[dict[str, Any]]:
         ctx.require("ingest")
         with self._db.session_for(ctx) as session:
@@ -235,7 +286,10 @@ class IngestionService:
                 .order_by(IngestionJob.created_at.desc())
                 .limit(limit)
             ).all()
-            return [job_summary(job, version, source) for job, version, source in rows]
+            closed = self._close_interrupted(session, [(job, version) for job, version, _ in rows])
+            summaries = [job_summary(job, version, source) for job, version, source in rows]
+        self._audit_interrupted(ctx, closed)
+        return summaries
 
     def get_job(self, ctx: AccessContext, job_id: str) -> dict[str, Any]:
         ctx.require("ingest")
@@ -253,7 +307,44 @@ class IngestionService:
             if row is None:
                 raise NotFoundError("No such job.")
             job, version, source = row
-            return job_detail(job, version, source)
+            closed = self._close_interrupted(session, [(job, version)])
+            detail = job_detail(job, version, source)
+        self._audit_interrupted(ctx, closed)
+        return detail
+
+    def _close_interrupted(
+        self, session: Any, jobs: Iterable[tuple[IngestionJob, SourceVersion]]
+    ) -> list[str]:
+        """Mark jobs that were cut short as failed (inline mode only); returns their IDs."""
+        if self._interrupted_after is None:
+            return []
+        cutoff = _now() - self._interrupted_after
+        closed: list[str] = []
+        for job, version in jobs:
+            if job.status not in ("queued", "running") or job.updated_at >= cutoff:
+                continue
+            stages = [dict(stage) for stage in job.stages]
+            for stage in stages:
+                if stage["status"] == "running":
+                    stage["status"] = "failed"
+                    stage["detail"] = INTERRUPTED_MESSAGE
+            job.stages = stages
+            job.status = "failed"
+            job.last_error = INTERRUPTED_MESSAGE
+            job.finished_at = job.updated_at = _now()
+            version.status = "failed"
+            closed.append(str(job.id))
+        return closed
+
+    def _audit_interrupted(self, ctx: AccessContext, job_ids: list[str]) -> None:
+        for job_id in job_ids:
+            logger.warning("job_interrupted", extra={"fields": {"job_id": job_id}})
+            self._audit.record(
+                AuditEvent(
+                    "ingest", "job_failed", "failed", details={"job_id": job_id, "error": "interrupted"}
+                ),
+                ctx,
+            )
 
 
 def job_summary(job: IngestionJob, version: SourceVersion, source: Source) -> dict[str, Any]:

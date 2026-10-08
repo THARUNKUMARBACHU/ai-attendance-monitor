@@ -43,6 +43,10 @@ MIN_INK_PIXELS = 500  # darker pixels than this on a page, or it is blank
 REVIEW_CAP = 0.5
 MAX_WORKERS = 4
 TESSERACT_TIMEOUT = 180  # seconds per Tesseract run
+# Pages are read in parallel, one Tesseract process each. Tesseract's own OpenMP threads on top of that
+# oversubscribe the CPUs: on 8 cores the five-page sample scan took 169 s instead of about 30 s, and on a
+# single CPU it timed out. One thread per process; set OMP_THREAD_LIMIT yourself to override.
+os.environ.setdefault("OMP_THREAD_LIMIT", "1")
 _TESSERACT_CONFIG = f"--psm 6 --dpi {DPI}"
 _LINE_CONFIG = f"--psm 7 --dpi {DPI}"
 

@@ -310,8 +310,8 @@ export const api = {
   devUsers: (signal?: AbortSignal) =>
     request<DevUsersResponse>('/api/v1/auth/dev-users', { auth: false, signal }),
 
-  devToken: (userId: string) => {
-    const body: DevTokenRequest = { user_id: userId };
+  devToken: (userId: string, accessCode?: string) => {
+    const body: DevTokenRequest = accessCode ? { user_id: userId, access_code: accessCode } : { user_id: userId };
     return request<TokenResponse>('/api/v1/auth/dev-token', { method: 'POST', json: body, auth: false });
   },
 
@@ -325,7 +325,9 @@ export const api = {
     const form = new FormData();
     form.append('file', file, file.name);
     if (entityId) form.append('entity_id', entityId);
-    return request<IngestionAccepted>('/api/v1/ingestions', { method: 'POST', form, timeoutMs: 120_000 });
+    // Long, because a deployment without a background worker processes the file inside this request
+    // (a scanned PDF takes about a minute), and the host stops a request after 300 seconds.
+    return request<IngestionAccepted>('/api/v1/ingestions', { method: 'POST', form, timeoutMs: 290_000 });
   },
 
   jobs: (limit = 20) => request<JobListResponse>(`/api/v1/ingestions?limit=${limit}`),

@@ -63,3 +63,9 @@ def test_unreachable_qdrant_is_down(make_client: Callable[..., TestClient]) -> N
     response = client.get("/health/ready")
     assert response.status_code == 503
     assert response.json()["checks"]["vector"]["status"] == "down"
+
+
+def test_inline_mode_reports_the_queue_as_inline(make_client: Callable[..., TestClient]) -> None:
+    checks = make_client(make_settings(ingestion_mode="inline")).get("/health/ready").json()["checks"]
+    assert checks["queue"]["status"] == "up"
+    assert checks["queue"]["detail"] == "inline: each upload is processed in its own request"

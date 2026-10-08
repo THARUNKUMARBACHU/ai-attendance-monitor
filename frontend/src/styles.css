@@ -914,6 +914,10 @@ kbd {
   color: var(--text-2);
 }
 
+.signin-code {
+  max-width: 22rem;
+}
+
 .signin-failed {
   display: grid;
   gap: 12px;

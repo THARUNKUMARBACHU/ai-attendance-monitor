@@ -30,10 +30,14 @@ def ready(request: Request) -> JSONResponse:
     provider = CheckResult(
         "configured" if settings.llm_api_key else "not_configured", detail=settings.llm_provider
     )
+    if settings.ingestion_mode == "inline":
+        queue = CheckResult("up", detail="inline: each upload is processed in its own request")
+    else:
+        queue = redis
     checks = {
         "service": CheckResult("up"),
         "database": database,
-        "queue": redis,
+        "queue": queue,
         "cache": redis,
         "search": vector,
         "vector": vector,

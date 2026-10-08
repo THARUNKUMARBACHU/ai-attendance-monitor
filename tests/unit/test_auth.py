@@ -133,3 +133,30 @@ def test_stale_role_in_token_is_rejected(client: TestClient, settings: Settings)
 def test_token_for_other_tenant_user_is_rejected(client: TestClient, settings: Settings) -> None:
     token = _sign(settings, _claims(settings, sub="globex.admin", tenant_id="acme"))
     assert client.get("/api/v1/me", headers={"Authorization": f"Bearer {token}"}).status_code == 401
+
+
+DEMO_CODE = "invite-only-2026"
+
+
+def test_access_code_is_required_when_the_deployment_sets_one(
+    make_client: Callable[..., TestClient], audit: RecordingAudit
+) -> None:
+    client = make_client(make_settings(demo_access_code=DEMO_CODE))
+    assert client.get("/api/v1/auth/dev-users").json()["access_code_required"] is True
+    for body in ({"user_id": "acme.admin"}, {"user_id": "acme.admin", "access_code": "wrong-guess-123"}):
+        response = client.post("/api/v1/auth/dev-token", json=body)
+        assert response.status_code == 401
+        assert "access code" in response.json()["detail"]
+    assert audit.actions().count("dev_token_denied") == 2
+    assert all("wrong-guess-123" not in str(event.details) for event, _ in audit.events)
+    response = client.post("/api/v1/auth/dev-token", json={"user_id": "acme.admin", "access_code": DEMO_CODE})
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("code", [None, ""])
+def test_no_access_code_is_asked_for_unless_one_is_set(
+    make_client: Callable[..., TestClient], code: str | None
+) -> None:
+    client = make_client(make_settings(demo_access_code=code))
+    assert client.get("/api/v1/auth/dev-users").json()["access_code_required"] is False
+    assert client.post("/api/v1/auth/dev-token", json={"user_id": "acme.admin"}).status_code == 200

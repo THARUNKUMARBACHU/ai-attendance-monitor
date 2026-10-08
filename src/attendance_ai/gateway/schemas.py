@@ -10,6 +10,9 @@ class DevTokenRequest(BaseModel):
 
     user_id: str = Field(pattern=r"^[a-z0-9][a-z0-9._-]{2,63}$", examples=["acme.admin"])
     product_id: str = Field(default="hrms", pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$")
+    access_code: str | None = Field(
+        default=None, max_length=200, description="Required when the deployment sets DEMO_ACCESS_CODE."
+    )
 
 
 class TokenResponse(BaseModel):
@@ -51,6 +54,7 @@ class DevUser(BaseModel):
 
 class DevUsersResponse(BaseModel):
     users: list[DevUser]
+    access_code_required: bool = False
 
 
 class CheckResponse(BaseModel):
