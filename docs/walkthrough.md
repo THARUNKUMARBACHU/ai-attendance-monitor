@@ -15,6 +15,7 @@ Each step names the user, the action and the point to make. The whole demo costs
 1. Start the stack (README, "Run it"): the API and the worker. Open http://127.0.0.1:8000/ui/. The system status in the top bar should read **All systems**.
 2. Start with an empty database, or accept that re-uploads show as duplicates, which is itself worth showing.
 3. Have a terminal open in the project folder for the two script steps.
+4. On the hosted demo, enter the access code on the sign-in page first. The first request after a few idle minutes takes 10 to 20 seconds, and an upload stays on "Uploading" until it is processed (about a minute for the scanned PDF). For the script steps, add `--base-url https://<your-app>.vercel.app --access-code <code> --timeout 300`.
 
 ## 1. Sign-in and access model (1 min)
 

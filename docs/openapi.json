@@ -1521,6 +1521,19 @@
             "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$",
             "title": "Product Id",
             "default": "hrms"
+          },
+          "access_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Code",
+            "description": "Required when the deployment sets DEMO_ACCESS_CODE."
           }
         },
         "additionalProperties": false,
@@ -1581,6 +1594,11 @@
             },
             "type": "array",
             "title": "Users"
+          },
+          "access_code_required": {
+            "type": "boolean",
+            "title": "Access Code Required",
+            "default": false
           }
         },
         "type": "object",

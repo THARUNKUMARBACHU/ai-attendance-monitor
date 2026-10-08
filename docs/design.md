@@ -275,6 +275,7 @@ How each format points back to its source:
 - The worker is a separate process (`python -m attendance_ai.worker`). It sets the job's tenant context, then runs the stages under row-level security.
 - Dramatiq retries a failed job with exponential backoff, up to 3 attempts. After that the message goes to Dramatiq's dead-letter queue, the job is marked `failed`, and it stays visible in the status endpoint.
 - A periodic sweep re-enqueues jobs left `queued`, for example if enqueueing failed after the commit.
+- **Inline mode** (`INGESTION_MODE=inline`, used by the Vercel deployment, which cannot run a worker): the upload request runs the same pipeline itself through `ingestion/inline.py`. Temporary failures are retried there after a short pause, up to 3 attempts. With no sweep, a job still `queued` or `running` after 10 minutes lost its request and is shown as `failed`. In either mode, uploading a file whose processing failed processes the same version again instead of being reported as a duplicate.
 
 ### Parsers
 
@@ -586,6 +587,8 @@ The mechanism is a tenant-scoped example store (`src/attendance_ai/feedback/`). 
 | `TESSERACT_CMD` | `C:\Program Files\Tesseract-OCR\tesseract.exe` | |
 | `JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_TTL_MINUTES` | | Token signing and validation. |
 | `AUTH_DEV_LOGIN_ENABLED` | `true` | Dev only. |
+| `DEMO_ACCESS_CODE` | at least 8 characters | Optional: the demo sign-in also asks for this code, for a shared public demo. |
+| `INGESTION_MODE` | `queue` | `queue` (the worker) or `inline` (the upload request processes its own file). |
 | `STORAGE_DIR` | `./var/storage` | Original uploads. |
 | `SEED_FILE` | `sample_data/seed/tenants.json` | |
 | `UPLOAD_MAX_MB` | `20` | |
@@ -646,6 +649,8 @@ The mechanism is a tenant-scoped example store (`src/attendance_ai/feedback/`). 
 | Tests | `uv run pytest` runs the unit tests. Set `TEST_DATABASE_ADMIN_URL` to a superuser URL to also run the integration tests, which create and drop their own database. |
 
 Docker Compose (`docker-compose.yml`: postgres, redis, qdrant, a one-shot setup, api and worker) is the one-command alternative. The README has both paths; the normal commands above are the first choice.
+
+A hosted demo runs on Vercel's free plan as a single function (`app.py`, configured by `vercel.json` and `[tool.vercel]` in `pyproject.toml`). It processes uploads inline, keeps them in `/tmp` only while processing, bundles the embedding models and a Tesseract build at build time (`scripts/vercel_build.py`), and is shared by an access code. The README's "Hosted demo" section has the details and the deployment steps.
 
 ## 16. Real, simulated, deferred
 

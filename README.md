@@ -11,6 +11,7 @@ Built for the Vardaan Data Sciences AI engineer take-home assignment. **All data
 - [What it does](#what-it-does)
 - [Run it: normal commands (first choice)](#run-it-normal-commands-first-choice)
 - [Run it: Docker Compose (alternative)](#run-it-docker-compose-alternative)
+- [Hosted demo (Vercel)](#hosted-demo-vercel)
 - [Try it](#try-it)
 - [API](#api)
 - [Architecture](#architecture)
@@ -34,7 +35,7 @@ Built for the Vardaan Data Sciences AI engineer take-home assignment. **All data
 
 | Requirement | How |
 |---|---|
-| Mixed-format ingestion | Upload through the UI or API. Parsers handle CSV, XLSX (long and matrix/muster layouts), DOCX tables and narrative, text PDF, and scanned PDF with Tesseract OCR. A worker processes each file through validate → extract → normalise → store → index, with retries. |
+| Mixed-format ingestion | Upload through the UI or API. Parsers handle CSV, XLSX (long and matrix/muster layouts), DOCX tables and narrative, text PDF, and scanned PDF with Tesseract OCR. A worker processes each file through validate → extract → normalise → store → index, with retries; on the hosted demo, the upload request does the same work itself. |
 | Canonical model and traceability | Each record is one employee on one day: date, employee, department, status, times, hours and remarks. It carries its source file and page, row or cell, extraction method and confidence, review status and classification, plus product, tenant and module. |
 | Idempotency and change detection | Files are identified by a SHA-256 checksum, so a re-upload is marked `duplicate`. A changed file becomes a new version, and only the records that changed are replaced (a record-level diff). |
 | OCR you can trust | Each field gets its own confidence. Doubtful cells become `needs_review` and are **never used in answers**; answers say when records were held back. |
@@ -118,7 +119,45 @@ docker compose down
 docker compose down -v
 ```
 
-The compose file never reads `.env`, which is for the normal commands; containers get their settings only from `.env.docker`. The API and the worker never receive the database admin or owner credentials; only the setup job does. The normal commands are the tested path: the test results and end-to-end runs come from them. The Docker files are provided as the alternative and were not part of those runs.
+The compose file never reads `.env`, which is for the normal commands; containers get their settings only from `.env.docker`. The API and the worker never receive the database admin or owner credentials; only the setup job does. The image was built and checked on 8 October 2026 without any outside service: Tesseract read all 80 rows of the scanned PDF, the three embedding models loaded with networking off, and the API served the UI and its health check. The test results and the end-to-end runs come from the normal commands.
+
+## Hosted demo (Vercel)
+
+A live copy runs on Vercel's free Hobby plan, from the same code. Its link and access code are sent with the submission; the sign-in page asks for the code, then shows the same demo users.
+
+**How it differs from running it yourself.** Vercel runs the API as a function: no background worker, a read-only file system apart from `/tmp`, and requests up to 4.5 MB.
+
+| | Normal commands or Docker | Hosted demo |
+|---|---|---|
+| Uploads | Queued, then processed by the worker | Processed inside the upload request (`INGESTION_MODE=inline`); the scanned PDF takes about a minute |
+| Original files | Kept under `var/storage/` | Kept only while they are processed |
+| Largest upload | 20 MB | 4 MB |
+| First request after 5 idle minutes | Immediate | 10 to 20 seconds, while the function starts and loads the models |
+| Sign-in | Demo users | Demo users, after the access code (`DEMO_ACCESS_CODE`) |
+
+Everything else is identical: OCR, questions with citations, isolation, exports and feedback. A job cut off by the host's 300-second limit is shown as failed after 10 minutes, and uploading the file again processes it again.
+
+**How the deployment is built.**
+- `app.py` at the project root is the entry point Vercel loads. Through `attendance_ai/serverless.py` it sets the platform's defaults (inline uploads, storage in `/tmp`, a 4 MB upload limit, a small database pool, models loaded offline) and points OCR at the bundled Tesseract. Settings in the Vercel project always win.
+- `scripts/vercel_build.py` runs after the dependencies are installed (`[tool.vercel.scripts]` in `pyproject.toml`). It builds the UI, downloads the three embedding models and checks that they load without the network, and fetches a Tesseract 5 build for Amazon Linux 2023 at a pinned version, checked against its SHA-256.
+- `vercel.json` places the function in Mumbai (`bom1`, next to the database), allows it 300 seconds, keeps tests and documents out of it, and sets the UI's security headers.
+
+**Deploying your own copy.**
+1. Set up the database once with `scripts/db_setup.py`, as in the normal commands.
+2. Import the repository in Vercel. Keep the FastAPI preset and leave the build settings without overrides.
+3. Add these environment variables:
+   - `APP_ENV=dev`, `AUTH_DEV_LOGIN_ENABLED=true`, `DEMO_ACCESS_CODE`, `JWT_SECRET`;
+   - `DATABASE_URL`, `DATABASE_QUERY_URL`, `REDIS_URL`, `QDRANT_URL`, `QDRANT_API_KEY`, `OPENROUTER_API_KEY`.
+   - Leave out the admin and owner database URLs, which the running app never needs, and any file paths from a local `.env`.
+4. Under **Settings → Environment Variables**, add `VERCEL_SUPPORT_LARGE_FUNCTIONS=1`. With the models and Tesseract, the function is larger than the standard 500 MB.
+5. Deploy, then open `/health/ready`: every check should be up, and the queue should read "inline".
+6. Load the samples and run the demo questions against it:
+   ```powershell
+   uv run python scripts/load_samples.py --base-url https://<your-app>.vercel.app --access-code <code> --timeout 300
+   uv run python scripts/run_live_eval.py --base-url https://<your-app>.vercel.app --access-code <code>
+   ```
+
+Set a spending limit on the OpenRouter key: anyone with the link and the code can ask questions.
 
 ## Try it
 
@@ -156,7 +195,7 @@ The full specification is `docs/openapi.json`, and `/docs` when running. Every e
 | Capability | Endpoint | Permission |
 |---|---|---|
 | Health and diagnostics | `GET /health/live`, `GET /health/ready` (service, database, queue, cache, search, vector, model provider) | none |
-| Demo sign-in (development only) | `GET /api/v1/auth/dev-users`, `POST /api/v1/auth/dev-token` | none |
+| Demo sign-in (development only) | `GET /api/v1/auth/dev-users`, `POST /api/v1/auth/dev-token` (with `access_code` when `DEMO_ACCESS_CODE` is set) | none |
 | Caller context | `GET /api/v1/me` | any |
 | Ingest | `POST /api/v1/ingestions` (multipart `file`, optional `entity_id`): returns the job ID, status, checksum, version and duplicate reference | `ingest` (admin) |
 | Processing status | `GET /api/v1/ingestions`, `GET /api/v1/ingestions/{job_id}`: stages, attempts, counts, failures, errors | `ingest` |
@@ -293,6 +332,7 @@ Settings come from environment variables or `.env`. [.env.example](.env.example)
 |---|---|
 | `JWT_SECRET` | Token signing key, at least 32 characters. Required. |
 | `AUTH_DEV_LOGIN_ENABLED` | The demo sign-in picker. Refused when `APP_ENV=prod`. |
+| `DEMO_ACCESS_CODE` | Optional. When set (at least 8 characters), the demo sign-in also asks for this code, so a public demo can be shared by invitation. |
 | `DATABASE_ADMIN_URL` | Used only by `scripts/db_setup.py`, to create the roles and the database. |
 | `DATABASE_OWNER_URL` | Runs the migrations. |
 | `DATABASE_URL` | The app role, used by the API and the worker. |
@@ -302,6 +342,7 @@ Settings come from environment variables or `.env`. [.env.example](.env.example)
 | `QDRANT_URL`, `QDRANT_API_KEY` | The vector store. Leave empty to run without document search. |
 | `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `OPENROUTER_FALLBACK_MODEL` | The model chain. Set `LLM_PROVIDER=openai` to use OpenAI directly. |
 | `TESSERACT_CMD` | The Tesseract executable, if it is not on the PATH. |
+| `INGESTION_MODE` | `queue` (default): the worker processes uploads from the Redis queue. `inline`: the upload request processes its own file, for hosts without a background worker; the Vercel deployment sets it. |
 | `STORAGE_DIR`, `MODEL_CACHE_DIR` | Where uploads and local models are kept (default `var/`). |
 | `FEEDBACK_MIN_SIMILARITY` | How close a question must be to an approved example's question (default 0.85). |
 | `EXPORT_ROW_CAP` | The largest synchronous export (default 10,000 records). |
@@ -350,6 +391,7 @@ Details are in [sample_data/README.md](sample_data/README.md).
 | Ingestion | Four formats plus OCR, versioning, retries, quarantine | Synchronous-size files (20 MB limit); printed scans | Streaming for large files, handwriting-capable OCR, a manual review screen for `needs_review` records |
 | Feedback | Scoped, versioned, replay-verified examples with rollback | Few-shot guidance; no fine-tuning | An approval workflow (four-eyes), example expiry, offline evaluation before activation |
 | Operations | Health and readiness, structured JSON logs, request IDs, audit | Single instance | Metrics and tracing (OpenTelemetry), rate limiting, horizontal scaling of the API and worker |
+| Hosting | Normal commands, Docker Compose, and a hosted demo on Vercel | The hosted demo processes uploads inside the request, keeps originals only while processing, and is shared by an access code | A container platform with a separate worker, object storage and an identity provider |
 
 ## Known limitations
 
@@ -362,8 +404,9 @@ Details are in [sample_data/README.md](sample_data/README.md).
 - **Feedback guides wording and structure.** An example applies only to a closely equivalent question (similarity ≥ 0.85) in exactly the same scope.
 - **Exports are synchronous**, up to 10,000 records.
 - **Not implemented:** rate limiting, per-tenant quotas and model spend caps.
-- **fastembed 0.8.1 quirk:** with internet access, loading the BM25 model contacts the Hugging Face hub. The Dockerfile adds the empty placeholder file that fastembed looks for, so that the image can load BM25 from its own cache.
-- **Docker Compose** is provided as the alternative but was not part of the final end-to-end runs; the tested path is the normal commands.
+- **fastembed 0.8.1 quirk:** BM25 loads from its cache only when a placeholder model file and every stopword list exist, and fastembed expects one list (`tamil.txt`) that the model does not contain. Otherwise it contacts the Hugging Face hub on every start. The Dockerfile and the Vercel build add these empty files, so both load BM25 offline.
+- **Docker Compose:** the image is built and checked (see above); the whole stack has not been run end to end in Compose. The tested path is the normal commands.
+- **Hosted demo:** uploads wait while they are processed, files over 4 MB are refused, originals are not kept, and the first request after idle is slow (see [Hosted demo](#hosted-demo-vercel)).
 
 ## Project layout
 
@@ -371,7 +414,8 @@ Details are in [sample_data/README.md](sample_data/README.md).
 src/attendance_ai/
   gateway/        auth (JWT), access-context dependency, routes (health, auth, ingestions, records, query, exports, feedback)
   orchestration/  question guard, planner, answer pipeline, API models
-  ingestion/      file checks, parsers (CSV, XLSX, DOCX, PDF, OCR), normaliser, store, chunking, indexing, pipeline, queue
+  ingestion/      file checks, parsers (CSV, XLSX, DOCX, PDF, OCR), normaliser, store, chunking, indexing, pipeline,
+                  queue, inline queue (uploads processed in the request)
   retrieval/      SQL guard, SQL runner (bound scope), document search, context packing
   generation/     model router and circuit breaker, OpenAI-compatible provider, composer, versioned prompts
   governance/     audit, grounding, confidence, PII, injection detection
@@ -380,11 +424,14 @@ src/attendance_ai/
   stores/         PostgreSQL (engine, models, setup), Qdrant, embeddings, Redis cache and queue, file store, versions
   core/           settings, access context, directory, errors, logging
   main.py         FastAPI app factory       worker.py   ingestion worker
+  serverless.py   platform defaults for the Vercel deployment
 migrations/       Alembic (row-level security policies, v_attendance)
 frontend/         React UI (built to frontend/dist, served at /ui)
-scripts/          db_setup, load_samples, run_live_eval, check_llm_key, export_openapi, package_submission
+scripts/          db_setup, load_samples, run_live_eval, check_llm_key, export_openapi, package_submission,
+                  vercel_build (the Vercel build step)
 tests/            unit/ (no servers), integration/ (throwaway PostgreSQL)
 sample_data/      seed, inputs, scenarios, ground truth, expected results, schema, generator
 docs/             architecture, design, test summary, walkthrough, openapi.json
+app.py, vercel.json   the Vercel entry point and configuration
 Dockerfile, docker-compose.yml, .env.example, .env.docker.example
 ```
