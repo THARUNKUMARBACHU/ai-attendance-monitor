@@ -164,3 +164,5 @@ sequenceDiagram
 | One-off setup | `python scripts/db_setup.py` | PostgreSQL (admin, then owner): roles, database, migrations, grants |
 
 Everything runs as three processes on one machine, either with the normal commands or with `docker compose` (see the README).
+
+**Hosted demo (Vercel).** One function, `app.py`, replaces the API and the worker. Vercel cannot keep a worker running, so each upload is processed inside its own request (`INGESTION_MODE=inline`), with the same pipeline, retries and job states. It talks to PostgreSQL (app and query roles), Redis (answer cache and circuit breaker, no queue), Qdrant and the LLM provider, and keeps uploads in `/tmp` only while processing them. The isolation checkpoints above are unchanged: the same code enforces them, and the demo adds an access code in front of the demo sign-in.
